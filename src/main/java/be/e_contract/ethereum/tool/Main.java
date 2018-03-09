@@ -8,6 +8,7 @@ package be.e_contract.ethereum.tool;
 
 import java.io.Console;
 import java.io.File;
+import java.math.BigInteger;
 import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,6 +20,11 @@ import org.apache.commons.cli.ParseException;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.ipc.UnixIpcService;
 
 /**
  * Ethereum Tool main class.
@@ -40,6 +46,10 @@ public class Main {
         Option verifykey = Option.builder("v").required(false).hasArg(true)
                 .argName("keyfile").longOpt("verifykey").desc("verify a key").build();
         options.addOption(verifykey);
+
+        Option nonce = Option.builder("n").required(false).hasArg(true).numberOfArgs(2)
+                .argName("location> <address").longOpt("nonce").desc("retrieve the transaction nonce").build();
+        options.addOption(nonce);
 
         CommandLineParser parser = new DefaultParser();
         CommandLine line;
@@ -90,6 +100,21 @@ public class Main {
                 return;
             }
             System.out.println("address: " + credentials.getAddress());
+            return;
+        }
+
+        if (line.hasOption("n")) {
+            String location = line.getOptionValues("n")[0];
+            String address = line.getOptionValues("n")[1];
+            Web3jService service;
+            if (location.startsWith("http")) {
+                service = new HttpService(location);
+            } else {
+                service = new UnixIpcService(location);
+            }
+            Web3j web3 = Web3j.build(service);
+            BigInteger transactionCount = web3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
+            System.out.println("transaction count: " + transactionCount);
             return;
         }
 
