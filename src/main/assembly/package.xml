@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly
+    xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>package</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <baseDirectory>/</baseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>be.e-contract:ethereum-tool</exclude>
+            </excludes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>be.e-contract:ethereum-tool</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/assembly</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>ethereum-tool.sh</include>
+            </includes>
+            <filtered>true</filtered>
+            <fileMode>0555</fileMode>
+        </fileSet>
+    </fileSets>
+</assembly>
