@@ -16,6 +16,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 
 /**
@@ -34,6 +36,10 @@ public class Main {
         Option createkey = Option.builder("c").required(false).hasArg(true)
                 .argName("keydirectory").longOpt("createkey").desc("create a new key").build();
         options.addOption(createkey);
+
+        Option verifykey = Option.builder("v").required(false).hasArg(true)
+                .argName("keyfile").longOpt("verifykey").desc("verify a key").build();
+        options.addOption(verifykey);
 
         CommandLineParser parser = new DefaultParser();
         CommandLine line;
@@ -63,7 +69,27 @@ public class Main {
                 System.out.println("could not create destination directory");
                 return;
             }
-            WalletUtils.generateNewWalletFile(new String(password), destDir, true);
+            String keyfile = WalletUtils.generateNewWalletFile(new String(password), destDir, true);
+            System.out.println("key file: " + keyfile);
+            return;
+        }
+
+        if (line.hasOption("v")) {
+            File keyFile = new File(line.getOptionValue("v"));
+            if (!keyFile.exists()) {
+                System.out.println("non existing key file");
+                return;
+            }
+            Console console = System.console();
+            char[] password = console.readPassword("Password: ");
+            Credentials credentials;
+            try {
+                credentials = WalletUtils.loadCredentials(new String(password), keyFile);
+            } catch (CipherException ex) {
+                System.out.println("incorrect password");
+                return;
+            }
+            System.out.println("address: " + credentials.getAddress());
             return;
         }
 
