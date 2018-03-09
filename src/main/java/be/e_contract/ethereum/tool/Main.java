@@ -8,6 +8,7 @@ package be.e_contract.ethereum.tool;
 
 import java.io.Console;
 import java.io.File;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
@@ -17,6 +18,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -25,6 +27,7 @@ import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
+import org.web3j.utils.Convert;
 
 /**
  * Ethereum Tool main class.
@@ -50,6 +53,14 @@ public class Main {
         Option nonce = Option.builder("n").required(false).hasArg(true).numberOfArgs(2)
                 .argName("location> <address").longOpt("nonce").desc("retrieve the transaction nonce").build();
         options.addOption(nonce);
+
+        Option gas = Option.builder("p").required(false).hasArg(true).numberOfArgs(1)
+                .argName("location").longOpt("gasprice").desc("retrieve the average gas price").build();
+        options.addOption(gas);
+
+        Option generatePassword = Option.builder("g").required(false).hasArg(false)
+                .longOpt("generatepassword").desc("generate a strong password").build();
+        options.addOption(generatePassword);
 
         CommandLineParser parser = new DefaultParser();
         CommandLine line;
@@ -115,6 +126,28 @@ public class Main {
             Web3j web3 = Web3j.build(service);
             BigInteger transactionCount = web3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
             System.out.println("transaction count: " + transactionCount);
+            return;
+        }
+
+        if (line.hasOption("p")) {
+            String location = line.getOptionValue("p");
+            Web3jService service;
+            if (location.startsWith("http")) {
+                service = new HttpService(location);
+            } else {
+                service = new UnixIpcService(location);
+            }
+            Web3j web3 = Web3j.build(service);
+            BigDecimal gasPriceWei = BigDecimal.valueOf(web3.ethGasPrice().send().getGasPrice().longValueExact());
+            System.out.println("gas price: " + gasPriceWei + "wei");
+            BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
+            System.out.println("gas price: " + gasPriceGwei + " Gwei");
+            return;
+        }
+
+        if (line.hasOption("g")) {
+            String password = RandomStringUtils.randomAlphanumeric(32);
+            System.out.println(password);
             return;
         }
 
