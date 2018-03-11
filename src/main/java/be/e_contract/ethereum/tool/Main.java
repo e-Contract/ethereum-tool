@@ -12,7 +12,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -22,6 +26,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.ethereum.core.Transaction;
+import org.ethereum.crypto.HashUtil;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -92,10 +98,10 @@ public class Main {
 
         if (line.hasOption("c")) {
             Console console = System.console();
-            char[] password = console.readPassword("Password: ");
-            char[] password2 = console.readPassword("Again: ");
+            char[] password = console.readPassword("Passphrase:");
+            char[] password2 = console.readPassword("Repeat passphrase:");
             if (!Arrays.equals(password, password2)) {
-                System.out.println("Password mismatch");
+                System.out.println("Passphrase mismatch");
                 return;
             }
             String destinationDirectory = line.getOptionValue("c");
@@ -108,6 +114,12 @@ public class Main {
             } else if (!destDir.mkdirs()) {
                 System.out.println("could not create destination directory");
                 return;
+            } else {
+                Set<PosixFilePermission> permissions = new HashSet<>();
+                permissions.add(PosixFilePermission.OWNER_READ);
+                permissions.add(PosixFilePermission.OWNER_WRITE);
+                permissions.add(PosixFilePermission.OWNER_EXECUTE);
+                Files.setPosixFilePermissions(destDir.toPath(), permissions);
             }
             String keyfile = WalletUtils.generateNewWalletFile(new String(password), destDir, true);
             System.out.println("key file: " + keyfile);
@@ -121,12 +133,12 @@ public class Main {
                 return;
             }
             Console console = System.console();
-            char[] password = console.readPassword("Password: ");
+            char[] password = console.readPassword("Passphrase: ");
             Credentials credentials;
             try {
                 credentials = WalletUtils.loadCredentials(new String(password), keyFile);
             } catch (CipherException ex) {
-                System.out.println("incorrect password");
+                System.out.println("incorrect passphrase");
                 return;
             }
             System.out.println("address: " + credentials.getAddress());
@@ -200,38 +212,41 @@ public class Main {
             System.out.println("gas price: " + transactionTemplate.gasPrice + " gwei");
             System.out.println("nonce: " + transactionTemplate.nonce);
             boolean confirmation = askConfirmation(console, "Sign transaction? (y/n)");
-            if (confirmation) {
-                char[] password = console.readPassword("Password: ");
-                Credentials credentials;
-                try {
-                    credentials = WalletUtils.loadCredentials(new String(password), keyFile);
-                } catch (CipherException ex) {
-                    System.out.println("incorrect password");
-                    return;
-                }
-                System.out.println("From address: " + credentials.getAddress());
-                confirmation = askConfirmation(console, "Confirm from address? (y/n)");
-                if (confirmation) {
-                    BigInteger nonce = BigInteger.valueOf(transactionTemplate.nonce);
-                    BigDecimal gasPriceGwei = BigDecimal.valueOf(transactionTemplate.gasPrice);
-                    BigDecimal gasPriceWei = Convert.toWei(gasPriceGwei, Convert.Unit.GWEI);
-                    BigDecimal valueEther = BigDecimal.valueOf(transactionTemplate.value);
-                    BigDecimal valueWei = Convert.toWei(valueEther, Convert.Unit.ETHER);
-                    BigInteger gasLimit = BigInteger.valueOf(21000);
-                    RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPriceWei.toBigIntegerExact(),
-                            gasLimit, transactionTemplate.to, valueWei.toBigIntegerExact());
-                    byte[] signedTransaction;
-                    if (null != transactionTemplate.chainId) {
-                        signedTransaction = TransactionEncoder.signMessage(rawTransaction, transactionTemplate.chainId, credentials);
-                    } else {
-                        signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
-                    }
-                    String hexValue = Numeric.toHexString(signedTransaction);
-                    FileUtils.writeStringToFile(outFile, hexValue, "UTF-8");
-                    return;
-                }
+            if (!confirmation) {
                 return;
             }
+
+            char[] password = console.readPassword("Passphrase: ");
+            Credentials credentials;
+            try {
+                credentials = WalletUtils.loadCredentials(new String(password), keyFile);
+            } catch (CipherException ex) {
+                System.out.println("incorrect passphrase");
+                return;
+            }
+            System.out.println("From address: " + credentials.getAddress());
+            confirmation = askConfirmation(console, "Confirm from address? (y/n)");
+            if (!confirmation) {
+                return;
+            }
+            BigInteger nonce = BigInteger.valueOf(transactionTemplate.nonce);
+            BigDecimal gasPriceGwei = BigDecimal.valueOf(transactionTemplate.gasPrice);
+            BigDecimal gasPriceWei = Convert.toWei(gasPriceGwei, Convert.Unit.GWEI);
+            BigDecimal valueEther = BigDecimal.valueOf(transactionTemplate.value);
+            BigDecimal valueWei = Convert.toWei(valueEther, Convert.Unit.ETHER);
+            BigInteger gasLimit = BigInteger.valueOf(21000);
+            RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPriceWei.toBigIntegerExact(),
+                    gasLimit, transactionTemplate.to, valueWei.toBigIntegerExact());
+            byte[] signedTransaction;
+            if (null != transactionTemplate.chainId) {
+                signedTransaction = TransactionEncoder.signMessage(rawTransaction, transactionTemplate.chainId, credentials);
+            } else {
+                signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
+            }
+            String transactionHash = Numeric.toHexString(HashUtil.sha3(signedTransaction));
+            System.out.println("transaction hash: " + transactionHash);
+            String hexValue = Numeric.toHexString(signedTransaction);
+            FileUtils.writeStringToFile(outFile, hexValue, "UTF-8");
             return;
         }
 
@@ -242,9 +257,33 @@ public class Main {
                 System.out.println("transaction file not found");
                 return;
             }
-            
+            String hexData = FileUtils.readFileToString(transactionFile, "UTF-8");
+            byte[] rawData = Numeric.hexStringToByteArray(hexData);
+            String transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
+            System.out.println("transaction hash: " + transactionHash);
+            Transaction transaction = new Transaction(rawData);
+            transaction.verify();
+            String from = Numeric.toHexString(transaction.getSender());
+            String to = Numeric.toHexString(transaction.getReceiveAddress());
+            System.out.println("from: " + from);
+            System.out.println("to: " + to);
+            Integer chainId = transaction.getChainId();
+            if (null != chainId) {
+                System.out.println("chain id: " + chainId);
+            }
+            BigInteger nonce = new BigInteger(transaction.getNonce());
+            System.out.println("nonce: " + nonce);
+            BigDecimal valueWei = new BigDecimal(new BigInteger(1, transaction.getValue()));
+            BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
+            System.out.println("value: " + valueEther + " ether");
+            BigDecimal gasLimitWei = new BigDecimal(new BigInteger(1, transaction.getGasLimit()));
+            System.out.println("gas limit: " + gasLimitWei + " wei");
+            BigDecimal gasPriceWei = new BigDecimal(new BigInteger(1, transaction.getGasPrice()));
+            BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
+            System.out.println("gas price: " + gasPriceGwei + " gwei");
+            return;
         }
-         
+
         if (line.hasOption("t")) {
             String location = line.getOptionValues("t")[0];
             String transactionfile = line.getOptionValues("t")[1];
