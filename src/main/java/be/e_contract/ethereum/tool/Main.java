@@ -30,9 +30,11 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 /**
  * Ethereum Tool main class.
@@ -40,41 +42,45 @@ import org.web3j.utils.Convert;
  * @author Frank Cornelis
  */
 public class Main {
-    
+
     public static void main(String[] args) throws Exception {
         Options options = new Options();
-        
+
         Option helpOption = Option.builder("h").required(false).hasArg(false).longOpt("help").desc("show help").build();
         options.addOption(helpOption);
-        
+
         Option createkeyOption = Option.builder("c").required(false).hasArg(true)
                 .argName("keydirectory").longOpt("createkey").desc("create a new key").build();
         options.addOption(createkeyOption);
-        
+
         Option verifykeyOption = Option.builder("v").required(false).hasArg(true)
                 .argName("keyfile").longOpt("verifykey").desc("verify a key").build();
         options.addOption(verifykeyOption);
-        
+
         Option nonceOption = Option.builder("n").required(false).hasArg(true).numberOfArgs(2)
                 .argName("location> <address").longOpt("nonce").desc("retrieve the transaction nonce").build();
         options.addOption(nonceOption);
-        
+
         Option gasPriceOption = Option.builder("p").required(false).hasArg(true).numberOfArgs(1)
                 .argName("location").longOpt("gasprice").desc("retrieve the average gas price").build();
         options.addOption(gasPriceOption);
-        
+
         Option generatePasswordOption = Option.builder("g").required(false).hasArg(false)
                 .longOpt("generatepassword").desc("generate a strong password").build();
         options.addOption(generatePasswordOption);
-        
+
         Option signOption = Option.builder("s").required(false).hasArg(true).numberOfArgs(3)
                 .argName("template> <keyfile> <outfile").longOpt("sign").desc("sign a transaction").build();
         options.addOption(signOption);
-        
+
+        Option transmitOption = Option.builder("t").required(false).hasArg(true).numberOfArgs(2)
+                .argName("location> <transactfile").longOpt("transmit").desc("transmit a transaction").build();
+        options.addOption(transmitOption);
+
         Option transactionOption = Option.builder("i").required(false).hasArg(true).numberOfArgs(1)
                 .argName("transactionfile").longOpt("inspect").desc("inspect a transaction file").build();
         options.addOption(transactionOption);
-        
+
         CommandLineParser parser = new DefaultParser();
         CommandLine line;
         try {
@@ -83,7 +89,7 @@ public class Main {
             printHelp(options);
             return;
         }
-        
+
         if (line.hasOption("c")) {
             Console console = System.console();
             char[] password = console.readPassword("Password: ");
@@ -107,7 +113,7 @@ public class Main {
             System.out.println("key file: " + keyfile);
             return;
         }
-        
+
         if (line.hasOption("v")) {
             File keyFile = new File(line.getOptionValue("v"));
             if (!keyFile.exists()) {
@@ -126,7 +132,7 @@ public class Main {
             System.out.println("address: " + credentials.getAddress());
             return;
         }
-        
+
         if (line.hasOption("n")) {
             String location = line.getOptionValues("n")[0];
             String address = line.getOptionValues("n")[1];
@@ -141,7 +147,7 @@ public class Main {
             System.out.println("transaction count: " + transactionCount);
             return;
         }
-        
+
         if (line.hasOption("p")) {
             String location = line.getOptionValue("p");
             Web3jService service;
@@ -152,26 +158,30 @@ public class Main {
             }
             Web3j web3 = Web3j.build(service);
             BigDecimal gasPriceWei = BigDecimal.valueOf(web3.ethGasPrice().send().getGasPrice().longValueExact());
-            System.out.println("gas price: " + gasPriceWei + "wei");
+            System.out.println("gas price: " + gasPriceWei + " wei");
             BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
             System.out.println("gas price: " + gasPriceGwei + " Gwei");
             return;
         }
-        
+
         if (line.hasOption("g")) {
             String password = RandomStringUtils.randomAlphanumeric(32);
             System.out.println(password);
             return;
         }
-        
+
         if (line.hasOption("s")) {
             String template = line.getOptionValues("s")[0];
             String keyfile = line.getOptionValues("s")[1];
             String outfile = line.getOptionValues("s")[2];
             File outFile = new File(outfile);
+            Console console = System.console();
             if (outFile.exists()) {
-                System.out.println("existing output file");
-                return;
+                System.out.println("existing output file: " + outfile);
+                boolean confirmation = askConfirmation(console, "Overwrite output file? (y/n)");
+                if (!confirmation) {
+                    return;
+                }
             }
             File templateFile = new File(template);
             if (!templateFile.exists()) {
@@ -189,9 +199,8 @@ public class Main {
             System.out.println("value: " + transactionTemplate.value + " ether");
             System.out.println("gas price: " + transactionTemplate.gasPrice + " gwei");
             System.out.println("nonce: " + transactionTemplate.nonce);
-            Console console = System.console();
-            String confirmation = console.readLine("Sign transaction? (y/n)");
-            if ("y".equals(confirmation)) {
+            boolean confirmation = askConfirmation(console, "Sign transaction? (y/n)");
+            if (confirmation) {
                 char[] password = console.readPassword("Password: ");
                 Credentials credentials;
                 try {
@@ -201,13 +210,12 @@ public class Main {
                     return;
                 }
                 System.out.println("From address: " + credentials.getAddress());
-                confirmation = console.readLine("Confirm address? (y/n)");
-                if ("y".equals(confirmation)) {
+                confirmation = askConfirmation(console, "Confirm from address? (y/n)");
+                if (confirmation) {
                     BigInteger nonce = BigInteger.valueOf(transactionTemplate.nonce);
                     BigDecimal gasPriceGwei = BigDecimal.valueOf(transactionTemplate.gasPrice);
                     BigDecimal gasPriceWei = Convert.toWei(gasPriceGwei, Convert.Unit.GWEI);
-                    // Can BigDecimal handle fractions?
-                    BigDecimal valueEther = new BigDecimal(transactionTemplate.value);
+                    BigDecimal valueEther = BigDecimal.valueOf(transactionTemplate.value);
                     BigDecimal valueWei = Convert.toWei(valueEther, Convert.Unit.ETHER);
                     BigInteger gasLimit = BigInteger.valueOf(21000);
                     RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPriceWei.toBigIntegerExact(),
@@ -218,19 +226,64 @@ public class Main {
                     } else {
                         signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
                     }
-                    FileUtils.writeByteArrayToFile(outFile, signedTransaction);
+                    String hexValue = Numeric.toHexString(signedTransaction);
+                    FileUtils.writeStringToFile(outFile, hexValue, "UTF-8");
                     return;
                 }
                 return;
             }
             return;
         }
-        
+
+        if (line.hasOption("i")) {
+            String transactionfile = line.getOptionValues("i")[0];
+            File transactionFile = new File(transactionfile);
+            if (!transactionFile.exists()) {
+                System.out.println("transaction file not found");
+                return;
+            }
+            
+        }
+         
+        if (line.hasOption("t")) {
+            String location = line.getOptionValues("t")[0];
+            String transactionfile = line.getOptionValues("t")[1];
+            File transactionFile = new File(transactionfile);
+            if (!transactionFile.exists()) {
+                System.out.println("transaction file not found");
+                return;
+            }
+            String transactionHex = FileUtils.readFileToString(transactionFile, "UTF-8");
+            Web3jService service;
+            if (location.startsWith("http")) {
+                service = new HttpService(location);
+            } else {
+                service = new UnixIpcService(location);
+            }
+            Web3j web3 = Web3j.build(service);
+            EthSendTransaction ethSendTransaction = web3.ethSendRawTransaction(transactionHex).send();
+            String transactionHash = ethSendTransaction.getTransactionHash();
+            System.out.println("transaction hash: " + transactionHash);
+            return;
+        }
+
         printHelp(options);
     }
-    
+
     private static void printHelp(Options options) throws Exception {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("ethereum-tool.sh", options);
+    }
+
+    private static boolean askConfirmation(Console console, String message) {
+        while (true) {
+            String confirmation = console.readLine(message);
+            if ("y".equals(confirmation)) {
+                return true;
+            }
+            if ("n".equals(confirmation)) {
+                return false;
+            }
+        }
     }
 }
