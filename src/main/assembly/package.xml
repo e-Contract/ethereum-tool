@@ -22,15 +22,13 @@
             </includes>
         </dependencySet>
     </dependencySets>
-    <fileSets>
-        <fileSet>
-            <directory>src/main/assembly</directory>
+    <files>
+        <file>
+            <source>src/main/assembly/ethereum-tool.sh</source>
             <outputDirectory>bin</outputDirectory>
-            <includes>
-                <include>ethereum-tool.sh</include>
-            </includes>
+            <destName>ethereum-tool</destName>
             <filtered>true</filtered>
             <fileMode>0555</fileMode>
-        </fileSet>
-    </fileSets>
+        </file>
+    </files>
 </assembly>

@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
  *
  * @author Frank Cornelis
  */
-@picocli.CommandLine.Command(name = "ethereum-tool.sh",
+@picocli.CommandLine.Command(name = "ethereum-tool",
         description = "Tool to manage offline transaction signing.",
         subcommands = {
             CreateKey.class,
