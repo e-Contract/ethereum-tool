@@ -17,8 +17,10 @@ import org.ethereum.crypto.HashUtil;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
@@ -55,6 +57,22 @@ public class Confirm implements Callable<Void> {
         Optional<TransactionReceipt> transactionReceiptOptional = getTransactionReceipt.getTransactionReceipt();
         if (!transactionReceiptOptional.isPresent()) {
             System.out.println("transaction receipt not available");
+            EthBlock pendingEthBlock = web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(DefaultBlockParameterName.PENDING.getValue()), true).send();
+            EthBlock.Block pendingBlock = pendingEthBlock.getBlock();
+            boolean pendingTransaction = false;
+            for (EthBlock.TransactionResult transactionResult : pendingBlock.getTransactions()) {
+                EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
+                Transaction transaction = transactionObject.get();
+                if (transactionHash.equals(transaction.getHash())) {
+                    pendingTransaction = true;
+                }
+            }
+            if (pendingTransaction) {
+                System.out.println("transaction is pending");
+                System.out.println("number of pending transactions: " + pendingBlock.getTransactions().size());
+            } else {
+                System.out.println("transaction is not pending");
+            }
             return null;
         }
         TransactionReceipt transactionReceipt = transactionReceiptOptional.get();
