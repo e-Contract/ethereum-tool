@@ -10,6 +10,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
 import org.ethereum.crypto.HashUtil;
@@ -21,7 +22,6 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
-import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 import picocli.CommandLine;
 
@@ -52,7 +52,12 @@ public class Confirm implements Callable<Void> {
         }
         Web3j web3 = Web3j.build(service);
         EthGetTransactionReceipt getTransactionReceipt = web3.ethGetTransactionReceipt(transactionHash).send();
-        TransactionReceipt transactionReceipt = getTransactionReceipt.getTransactionReceipt().get();
+        Optional<TransactionReceipt> transactionReceiptOptional = getTransactionReceipt.getTransactionReceipt();
+        if (!transactionReceiptOptional.isPresent()) {
+            System.out.println("transaction receipt not available");
+            return null;
+        }
+        TransactionReceipt transactionReceipt = transactionReceiptOptional.get();
         BigInteger transactionBlockNumber = transactionReceipt.getBlockNumber();
         System.out.println("transaction block number: " + transactionBlockNumber);
         BigDecimal gasUsed = new BigDecimal(transactionReceipt.getGasUsed());

@@ -60,6 +60,10 @@ public class Sign implements Callable<Void> {
         System.out.println("value: " + transactionTemplate.value + " ether");
         System.out.println("gas price: " + transactionTemplate.gasPrice + " gwei");
         System.out.println("nonce: " + transactionTemplate.nonce);
+        if (!WalletUtils.isValidAddress(transactionTemplate.to)) {
+            System.out.println("invalid address: " + transactionTemplate.to);
+            return null;
+        }
         boolean confirmation = askConfirmation(console, "Sign transaction? (y/n)");
         if (!confirmation) {
             return null;
