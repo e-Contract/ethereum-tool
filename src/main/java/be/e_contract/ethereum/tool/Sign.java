@@ -40,7 +40,7 @@ public class Sign implements Callable<Void> {
     public Void call() throws Exception {
         Console console = System.console();
         if (this.outFile.exists()) {
-            System.out.println("existing output file: " + this.outFile);
+            System.out.println("existing output file: " + this.outFile.getName());
             boolean confirmation = askConfirmation(console, "Overwrite output file? (y/n)");
             if (!confirmation) {
                 return null;

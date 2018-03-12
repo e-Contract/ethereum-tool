@@ -6,8 +6,6 @@
  */
 package be.e_contract.ethereum.tool;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.Console;
 import java.io.File;
 import java.nio.file.Files;
@@ -16,7 +14,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import org.apache.commons.io.FileUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import picocli.CommandLine;
@@ -61,25 +58,8 @@ public class CreateKey implements Callable<Void> {
         String address = credentials.getAddress();
         System.out.println("address: " + address);
         if (null != this.publicDirectory) {
-            if (this.publicDirectory.exists()) {
-                if (!this.publicDirectory.isDirectory()) {
-                    System.out.println("public destination not a directory");
-                    return null;
-                }
-            } else if (!this.publicDirectory.mkdirs()) {
-                System.out.println("could not create public destination directory");
-                return null;
-            }
-            File templateFile = new File(this.publicDirectory, "transaction-template-" + address + ".json");
-            TransactionTemplate transactionTemplate = new TransactionTemplate();
-            transactionTemplate.from = address;
-            transactionTemplate.to = "place destination address here";
-            transactionTemplate.chainId = 1; // Ethereum mainnet
-            transactionTemplate.gasPrice = 3;
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String transactionTemplateJSon = gson.toJson(transactionTemplate);
-            FileUtils.writeStringToFile(templateFile, transactionTemplateJSon, "UTF-8");
-            System.out.println("transaction template file: " + templateFile.getName());
+            TransactionTemplateGenerator transactionTemplateGenerator = new TransactionTemplateGenerator(this.publicDirectory);
+            transactionTemplateGenerator.generateTemplate(address);
         }
         return null;
     }

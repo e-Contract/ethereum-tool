@@ -20,6 +20,9 @@ public class VerifyKey implements Callable<Void> {
     @CommandLine.Option(names = {"-f", "--keyfile"}, required = true, description = "the key file")
     private File keyFile;
 
+    @CommandLine.Option(names = {"-t", "--templatedirectory"}, description = "the optional public transaction template directory")
+    private File publicDirectory;
+
     @Override
     public Void call() throws Exception {
         if (!this.keyFile.exists()) {
@@ -35,7 +38,12 @@ public class VerifyKey implements Callable<Void> {
             System.out.println("incorrect passphrase");
             return null;
         }
-        System.out.println("address: " + credentials.getAddress());
+        String address = credentials.getAddress();
+        System.out.println("address: " + address);
+        if (null != this.publicDirectory) {
+            TransactionTemplateGenerator transactionTemplateGenerator = new TransactionTemplateGenerator(this.publicDirectory);
+            transactionTemplateGenerator.generateTemplate(address);
+        }
         return null;
     }
 }
