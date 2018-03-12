@@ -24,7 +24,8 @@ import java.util.concurrent.Callable;
             Sign.class,
             Inspect.class,
             Transmit.class,
-            Help.class
+            Help.class,
+            Confirm.class
         },
         footer = "Copyright (C) 2018 e-Contract.be BVBA",
         separator = " "
