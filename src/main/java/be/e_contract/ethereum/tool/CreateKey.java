@@ -6,6 +6,8 @@
  */
 package be.e_contract.ethereum.tool;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.Console;
 import java.io.File;
 import java.nio.file.Files;
@@ -14,6 +16,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import org.apache.commons.io.FileUtils;
+import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import picocli.CommandLine;
 
@@ -22,6 +26,9 @@ public class CreateKey implements Callable<Void> {
 
     @CommandLine.Option(names = {"-d", "--keydirectory"}, required = true, description = "the key directory")
     private File keyDirectory;
+
+    @CommandLine.Option(names = {"-t", "--templatedirectory"}, description = "the optional public transaction template directory")
+    private File publicDirectory;
 
     @Override
     public Void call() throws Exception {
@@ -49,6 +56,31 @@ public class CreateKey implements Callable<Void> {
         }
         String keyfile = WalletUtils.generateNewWalletFile(new String(password), this.keyDirectory, true);
         System.out.println("key file: " + keyfile);
+        File keyFile = new File(this.keyDirectory, keyfile);
+        Credentials credentials = WalletUtils.loadCredentials(new String(password), keyFile);
+        String address = credentials.getAddress();
+        System.out.println("address: " + address);
+        if (null != this.publicDirectory) {
+            if (this.publicDirectory.exists()) {
+                if (!this.publicDirectory.isDirectory()) {
+                    System.out.println("public destination not a directory");
+                    return null;
+                }
+            } else if (!this.publicDirectory.mkdirs()) {
+                System.out.println("could not create public destination directory");
+                return null;
+            }
+            File templateFile = new File(this.publicDirectory, "transaction-template-" + address + ".json");
+            TransactionTemplate transactionTemplate = new TransactionTemplate();
+            transactionTemplate.from = address;
+            transactionTemplate.to = "place destination address here";
+            transactionTemplate.chainId = 1; // Ethereum mainnet
+            transactionTemplate.gasPrice = 3;
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String transactionTemplateJSon = gson.toJson(transactionTemplate);
+            FileUtils.writeStringToFile(templateFile, transactionTemplateJSon, "UTF-8");
+            System.out.println("transaction template file: " + templateFile.getName());
+        }
         return null;
     }
 }

@@ -72,7 +72,14 @@ public class Sign implements Callable<Void> {
             System.out.println("incorrect passphrase");
             return null;
         }
+        String address = credentials.getAddress();
         System.out.println("From address: " + credentials.getAddress());
+        if (transactionTemplate.from != null) {
+            if (!transactionTemplate.from.equals(address)) {
+                System.out.println("from address mismatch");
+                return null;
+            }
+        }
         confirmation = askConfirmation(console, "Confirm from address? (y/n)");
         if (!confirmation) {
             return null;
@@ -87,6 +94,7 @@ public class Sign implements Callable<Void> {
                 gasLimit, transactionTemplate.to, valueWei.toBigIntegerExact());
         byte[] signedTransaction;
         if (null != transactionTemplate.chainId) {
+            System.out.println("Chain Id: " + transactionTemplate.chainId);
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, transactionTemplate.chainId, credentials);
         } else {
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);

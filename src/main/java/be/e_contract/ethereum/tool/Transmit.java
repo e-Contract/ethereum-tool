@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
@@ -40,6 +41,12 @@ public class Transmit implements Callable<Void> {
         }
         Web3j web3 = Web3j.build(service);
         EthSendTransaction ethSendTransaction = web3.ethSendRawTransaction(transactionHex).send();
+        if (ethSendTransaction.hasError()) {
+            Response.Error error = ethSendTransaction.getError();
+            String errorMessage = error.getMessage();
+            System.out.println("error: " + errorMessage);
+            return null;
+        }
         String transactionHash = ethSendTransaction.getTransactionHash();
         System.out.println("transaction hash: " + transactionHash);
         return null;
