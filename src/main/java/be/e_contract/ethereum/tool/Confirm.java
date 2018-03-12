@@ -57,7 +57,7 @@ public class Confirm implements Callable<Void> {
         Optional<TransactionReceipt> transactionReceiptOptional = getTransactionReceipt.getTransactionReceipt();
         if (!transactionReceiptOptional.isPresent()) {
             System.out.println("transaction receipt not available");
-            EthBlock pendingEthBlock = web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(DefaultBlockParameterName.PENDING.getValue()), true).send();
+            EthBlock pendingEthBlock = web3.ethGetBlockByNumber(DefaultBlockParameterName.PENDING, true).send();
             EthBlock.Block pendingBlock = pendingEthBlock.getBlock();
             boolean pendingTransaction = false;
             for (EthBlock.TransactionResult transactionResult : pendingBlock.getTransactions()) {

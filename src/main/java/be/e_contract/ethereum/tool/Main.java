@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
  * @author Frank Cornelis
  */
 @picocli.CommandLine.Command(name = "ethereum-tool",
-        description = "Tool to manage offline transaction signing.",
+        description = "Tool to manage offline template-based transaction signing.",
         subcommands = {
             CreateKey.class,
             VerifyKey.class,
@@ -25,7 +25,8 @@ import java.util.concurrent.Callable;
             Inspect.class,
             Transmit.class,
             Help.class,
-            Confirm.class
+            Confirm.class,
+            Balance.class
         },
         footer = "Copyright (C) 2018 e-Contract.be BVBA",
         separator = " "
