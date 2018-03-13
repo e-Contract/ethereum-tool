@@ -19,21 +19,19 @@ package be.e_contract.ethereum.tool;
 
 import java.io.Console;
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "verifykey", description = "verify an Ethereum key", separator = " ")
-public class VerifyKey implements Callable<Void> {
-
+@CommandLine.Command(name = "update", description = "update the password on a key file", separator = " ")
+public class Update implements Callable<Void> {
+    
     @CommandLine.Option(names = {"-f", "--keyfile"}, required = true, description = "the key file")
     private File keyFile;
-
-    @CommandLine.Option(names = {"-t", "--templatedirectory"}, description = "the optional public transaction template directory")
-    private File publicDirectory;
-
+    
     @Override
     public Void call() throws Exception {
         if (!this.keyFile.exists()) {
@@ -41,20 +39,28 @@ public class VerifyKey implements Callable<Void> {
             return null;
         }
         Console console = System.console();
-        char[] password = console.readPassword("Passphrase: ");
+        char[] currentPassword = console.readPassword("Passphrase: ");
         Credentials credentials;
         try {
-            credentials = WalletUtils.loadCredentials(new String(password), this.keyFile);
+            credentials = WalletUtils.loadCredentials(new String(currentPassword), this.keyFile);
         } catch (CipherException ex) {
             Output.error("incorrect passphrase");
             return null;
         }
-        String address = credentials.getAddress();
-        System.out.println("address: " + address);
-        if (null != this.publicDirectory) {
-            TransactionTemplateGenerator transactionTemplateGenerator = new TransactionTemplateGenerator(this.publicDirectory);
-            transactionTemplateGenerator.generateTemplate(address);
+        
+        char[] password = console.readPassword("New passphrase:");
+        char[] password2 = console.readPassword("Repeat new passphrase:");
+        if (!Arrays.equals(password, password2)) {
+            Output.error("Passphrase mismatch");
+            return null;
         }
+        
+        String newKeyfile = WalletUtils.generateWalletFile(new String(password), credentials.getEcKeyPair(), this.keyFile.getParentFile(), true);
+        System.out.println("new key file: " + newKeyfile);
+        
+        Output.warning("Old key file: " + this.keyFile.getAbsolutePath());
+        Output.warning("Old key file you have to remove yourself.");
+        
         return null;
     }
 }
