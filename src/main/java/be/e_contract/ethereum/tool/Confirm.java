@@ -20,10 +20,12 @@ import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
+import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 import picocli.CommandLine;
 
@@ -33,19 +35,32 @@ public class Confirm implements Callable<Void> {
     @CommandLine.Option(names = {"-l", "--location"}, required = true, description = "the location of the client node")
     private String location;
 
-    @CommandLine.Option(names = {"-f", "--file"}, required = true, description = "the transaction file")
+    @CommandLine.Option(names = {"-f", "--file"}, description = "the transaction file")
     private File transactionFile;
+
+    @CommandLine.Option(names = {"-h", "--hash"}, description = "the transaction hash")
+    private String transactionHash;
 
     @Override
     public Void call() throws Exception {
-        if (!this.transactionFile.exists()) {
-            System.out.println("transaction file not found");
+        if (null == this.transactionFile && null == this.transactionHash) {
+            System.out.println("provide transaction file or transaction hash");
+            picocli.CommandLine.usage(this, System.out);
             return null;
         }
-        String transactionHex = FileUtils.readFileToString(this.transactionFile, "UTF-8");
-        byte[] rawData = Numeric.hexStringToByteArray(transactionHex);
-        String transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
-        System.out.println("transaction hash: " + transactionHash);
+        String _transactionHash;
+        if (null != transactionFile) {
+            if (!this.transactionFile.exists()) {
+                System.out.println("transaction file not found");
+                return null;
+            }
+            String transactionHex = FileUtils.readFileToString(this.transactionFile, "UTF-8");
+            byte[] rawData = Numeric.hexStringToByteArray(transactionHex);
+            _transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
+        } else {
+            _transactionHash = this.transactionHash;
+        }
+        System.out.println("transaction hash: " + _transactionHash);
         Web3jService service;
         if (this.location.startsWith("http")) {
             service = new HttpService(this.location);
@@ -53,7 +68,7 @@ public class Confirm implements Callable<Void> {
             service = new UnixIpcService(this.location);
         }
         Web3j web3 = Web3j.build(service);
-        EthGetTransactionReceipt getTransactionReceipt = web3.ethGetTransactionReceipt(transactionHash).send();
+        EthGetTransactionReceipt getTransactionReceipt = web3.ethGetTransactionReceipt(_transactionHash).send();
         Optional<TransactionReceipt> transactionReceiptOptional = getTransactionReceipt.getTransactionReceipt();
         if (!transactionReceiptOptional.isPresent()) {
             System.out.println("transaction receipt not available");
@@ -63,8 +78,9 @@ public class Confirm implements Callable<Void> {
             for (EthBlock.TransactionResult transactionResult : pendingBlock.getTransactions()) {
                 EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
                 Transaction transaction = transactionObject.get();
-                if (transactionHash.equals(transaction.getHash())) {
+                if (_transactionHash.equals(transaction.getHash())) {
                     pendingTransaction = true;
+                    break;
                 }
             }
             if (pendingTransaction) {
@@ -76,10 +92,12 @@ public class Confirm implements Callable<Void> {
             return null;
         }
         TransactionReceipt transactionReceipt = transactionReceiptOptional.get();
+        System.out.println("From: " + transactionReceipt.getFrom());
+        System.out.println("To: " + transactionReceipt.getTo());
         BigInteger transactionBlockNumber = transactionReceipt.getBlockNumber();
         System.out.println("transaction block number: " + transactionBlockNumber);
         BigDecimal gasUsed = new BigDecimal(transactionReceipt.getGasUsed());
-        System.out.println("gas used: " + gasUsed);
+        System.out.println("gas used: " + gasUsed + " wei");
         EthBlock ethBlock = web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(transactionBlockNumber), false).send();
         EthBlock.Block block = ethBlock.getBlock();
         BigInteger timestamp = block.getTimestamp();
@@ -90,6 +108,19 @@ public class Confirm implements Callable<Void> {
         // add one, since the transaction block also serves as confirmation
         BigInteger blocksOnTop = latestBlockNumber.subtract(transactionBlockNumber).add(BigInteger.ONE);
         System.out.println("number of confirming blocks: " + blocksOnTop);
+        EthTransaction ethTransaction = web3.ethGetTransactionByHash(_transactionHash).send();
+        Transaction transaction = ethTransaction.getTransaction().get();
+        BigInteger nonce = transaction.getNonce();
+        System.out.println("nonce: " + nonce);
+        BigDecimal valueWei = new BigDecimal(transaction.getValue());
+        BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
+        System.out.println("value: " + valueEther + " ether");
+        BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
+        BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
+        System.out.println("gas price: " + gasPriceGwei + " gwei");
+        BigDecimal transactionCostWei = gasUsed.multiply(gasPriceWei);
+        BigDecimal transactionCostEther = Convert.fromWei(transactionCostWei, Convert.Unit.ETHER);
+        System.out.println("transaction cost: " + transactionCostEther + " ether");
         return null;
     }
 }
