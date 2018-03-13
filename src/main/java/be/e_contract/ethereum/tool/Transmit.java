@@ -34,7 +34,7 @@ public class Transmit implements Callable<Void> {
         if (ethSendTransaction.hasError()) {
             Response.Error error = ethSendTransaction.getError();
             String errorMessage = error.getMessage();
-            System.out.println("error: " + errorMessage);
+            Output.error("error: " + errorMessage);
             return null;
         }
         String transactionHash = ethSendTransaction.getTransactionHash();

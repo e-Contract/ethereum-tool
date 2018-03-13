@@ -77,7 +77,7 @@ public class Confirm implements Callable<Void> {
                 System.out.println("transaction is pending");
                 System.out.println("number of pending transactions: " + pendingBlock.getTransactions().size());
             } else {
-                System.out.println("transaction is not pending");
+                Output.warning("transaction is not pending");
             }
             return null;
         }

@@ -30,11 +30,7 @@ public class Node implements Callable<Void> {
         String protocolVersion = this.web3.ethProtocolVersion().send().getProtocolVersion();
         System.out.println("protocol version: " + protocolVersion);
         boolean syncing = this.web3.ethSyncing().send().isSyncing();
-        if (syncing) {
-            Output.error("Syncing: " + syncing);
-        } else {
-            System.out.println("Syncing: " + syncing);
-        }
+        System.out.println("Syncing: " + syncing);
         String version = this.web3.netVersion().send().getNetVersion();
         System.out.println("Version: " + version);
         BigInteger peerCount = this.web3.netPeerCount().send().getQuantity();
