@@ -123,6 +123,22 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>ethereum-tool-version.properties</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>ethereum-tool-version.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
@@ -202,6 +218,11 @@
                 <artifactId>picocli</artifactId>
                 <version>2.3.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.fusesource.jansi</groupId>
+                <artifactId>jansi</artifactId>
+                <version>1.17</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -243,6 +264,10 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

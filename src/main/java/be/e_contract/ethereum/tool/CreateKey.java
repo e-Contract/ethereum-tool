@@ -33,16 +33,16 @@ public class CreateKey implements Callable<Void> {
         char[] password = console.readPassword("Passphrase:");
         char[] password2 = console.readPassword("Repeat passphrase:");
         if (!Arrays.equals(password, password2)) {
-            System.out.println("Passphrase mismatch");
+            Output.error("Passphrase mismatch");
             return null;
         }
         if (this.keyDirectory.exists()) {
             if (!this.keyDirectory.isDirectory()) {
-                System.out.println("destination not a directory");
+                Output.error("destination not a directory");
                 return null;
             }
         } else if (!this.keyDirectory.mkdirs()) {
-            System.out.println("could not create destination directory");
+            Output.error("could not create destination directory");
             return null;
         } else {
             Set<PosixFilePermission> permissions = new HashSet<>();

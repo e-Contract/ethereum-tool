@@ -26,7 +26,7 @@ public class VerifyKey implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (!this.keyFile.exists()) {
-            System.out.println("non existing key file");
+            Output.error("non existing key file");
             return null;
         }
         Console console = System.console();
@@ -35,7 +35,7 @@ public class VerifyKey implements Callable<Void> {
         try {
             credentials = WalletUtils.loadCredentials(new String(password), this.keyFile);
         } catch (CipherException ex) {
-            System.out.println("incorrect passphrase");
+            Output.error("incorrect passphrase");
             return null;
         }
         String address = credentials.getAddress();

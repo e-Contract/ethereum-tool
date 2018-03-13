@@ -26,8 +26,12 @@ import java.util.concurrent.Callable;
             Transmit.class,
             Help.class,
             Confirm.class,
-            Balance.class
+            Balance.class,
+            Node.class,
+            VersionCommand.class,
+            Pending.class
         },
+        versionProvider = VersionProvider.class,
         footer = "Copyright (C) 2018 e-Contract.be BVBA",
         separator = " "
 )

@@ -29,7 +29,7 @@ public class Transmit implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (!this.transactionFile.exists()) {
-            System.out.println("transaction file not found");
+            Output.error("transaction file not found");
             return null;
         }
         String transactionHex = FileUtils.readFileToString(this.transactionFile, "UTF-8");

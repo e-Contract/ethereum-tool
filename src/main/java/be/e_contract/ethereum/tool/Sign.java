@@ -47,11 +47,11 @@ public class Sign implements Callable<Void> {
             }
         }
         if (!this.templateFile.exists()) {
-            System.out.println("template file does not exist");
+            Output.error("template file does not exist");
             return null;
         }
         if (!this.keyFile.exists()) {
-            System.out.println("non existing key file");
+            Output.error("non existing key file");
             return null;
         }
         Gson gson = new Gson();
@@ -61,7 +61,7 @@ public class Sign implements Callable<Void> {
         System.out.println("gas price: " + transactionTemplate.gasPrice + " gwei");
         System.out.println("nonce: " + transactionTemplate.nonce);
         if (!WalletUtils.isValidAddress(transactionTemplate.to)) {
-            System.out.println("invalid address: " + transactionTemplate.to);
+            Output.error("invalid address: " + transactionTemplate.to);
             return null;
         }
         boolean confirmation = askConfirmation(console, "Sign transaction? (y/n)");
@@ -73,14 +73,14 @@ public class Sign implements Callable<Void> {
         try {
             credentials = WalletUtils.loadCredentials(new String(password), this.keyFile);
         } catch (CipherException ex) {
-            System.out.println("incorrect passphrase");
+            Output.error("incorrect passphrase");
             return null;
         }
         String address = credentials.getAddress();
         System.out.println("From address: " + credentials.getAddress());
         if (transactionTemplate.from != null) {
             if (!transactionTemplate.from.equals(address)) {
-                System.out.println("from address mismatch");
+                Output.error("from address mismatch");
                 return null;
             }
         }

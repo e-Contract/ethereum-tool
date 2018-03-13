@@ -27,11 +27,11 @@ public class TransactionTemplateGenerator {
         }
         if (this.publicDirectory.exists()) {
             if (!this.publicDirectory.isDirectory()) {
-                System.out.println("public destination not a directory");
+                Output.error("public destination not a directory");
                 return;
             }
         } else if (!this.publicDirectory.mkdirs()) {
-            System.out.println("could not create public destination directory");
+            Output.error("could not create public destination directory");
             return;
         }
         File templateFile = new File(this.publicDirectory, "transaction-template-" + address + ".json");
