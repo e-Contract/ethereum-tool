@@ -20,4 +20,10 @@ public class Output {
         System.out.println(message);
         AnsiConsole.out.print(Ansi.ansi().reset());
     }
+
+    public static void warning(String message) {
+        AnsiConsole.out.print(Ansi.ansi().reset().fg(Ansi.Color.YELLOW));
+        System.out.println(message);
+        AnsiConsole.out.print(Ansi.ansi().reset());
+    }
 }

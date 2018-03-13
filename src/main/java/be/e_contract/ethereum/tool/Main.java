@@ -7,6 +7,7 @@
 package be.e_contract.ethereum.tool;
 
 import java.util.concurrent.Callable;
+import org.web3j.protocol.Web3j;
 
 /**
  * Ethereum Tool main class.
@@ -39,6 +40,7 @@ public class Main implements Callable<Void> {
 
     public static void main(String[] args) throws Exception {
         picocli.CommandLine commandLine = new picocli.CommandLine(new Main());
+        commandLine.registerConverter(Web3j.class, new Web3TypeConverter());
         commandLine.parseWithHandler(new picocli.CommandLine.RunLast(), System.out, args);
     }
 
