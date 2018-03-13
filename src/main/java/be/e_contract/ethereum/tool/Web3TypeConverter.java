@@ -6,8 +6,13 @@
  */
 package be.e_contract.ethereum.tool;
 
+import java.math.BigInteger;
+import java.util.Date;
+import org.joda.time.DateTime;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
 import picocli.CommandLine;
@@ -34,6 +39,22 @@ public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
         if (web3.ethSyncing().send().isSyncing()) {
             Output.warning("Node is still syncing.");
             Output.warning("Results will be inaccurate!");
+        }
+        BigInteger peerCount = web3.netPeerCount().send().getQuantity();
+        if (BigInteger.ZERO.equals(peerCount)) {
+            Output.warning("Node has no peers.");
+            Output.warning("Node probably just started.");
+            Output.warning("Results will be inaccurate!");
+        }
+        EthBlock.Block block = web3.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
+        BigInteger timestamp = block.getTimestamp();
+        Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
+        DateTime timestampDateTime = new DateTime(timestampDate);
+        DateTime now = new DateTime();
+        if (timestampDateTime.plusMinutes(1).isBefore(now)) {
+            Output.warning("latest block is more than 1 minute old.");
+            Output.warning("Node might be out-of-sync.");
+            Output.warning("Results might be inaccurate.");
         }
         return web3;
     }

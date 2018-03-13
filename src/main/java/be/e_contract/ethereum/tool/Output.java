@@ -26,4 +26,16 @@ public class Output {
         System.out.println(message);
         AnsiConsole.out.print(Ansi.ansi().reset());
     }
+
+    public static void println(int indent, String message) {
+        AnsiConsole.out.print(Ansi.ansi().reset().cursorRight(indent));
+        System.out.println(message);
+        AnsiConsole.out.print(Ansi.ansi().reset());
+    }
+
+    public static void printlnBold(String message) {
+        AnsiConsole.out.print(Ansi.ansi().reset().bold());
+        System.out.println(message);
+        AnsiConsole.out.print(Ansi.ansi().reset());
+    }
 }
