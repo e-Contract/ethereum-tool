@@ -15,7 +15,14 @@ public class Password implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        String password = RandomStringUtils.randomAlphanumeric(32);
+        String password = "";
+        for (int idx = 0; idx < 32 / 4; idx++) {
+            if (!password.isEmpty()) {
+                // make it readable
+                password += "-";
+            }
+            password += RandomStringUtils.randomAlphanumeric(4);
+        }
         System.out.println(password);
         return null;
     }

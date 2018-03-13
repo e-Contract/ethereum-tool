@@ -44,6 +44,7 @@ public class TransactionTemplateGenerator {
             }
         }
         TransactionTemplate transactionTemplate = new TransactionTemplate();
+        transactionTemplate.description = "human readable description of the transaction";
         transactionTemplate.from = address;
         transactionTemplate.to = "place destination address here";
         transactionTemplate.chainId = 1; // Ethereum mainnet

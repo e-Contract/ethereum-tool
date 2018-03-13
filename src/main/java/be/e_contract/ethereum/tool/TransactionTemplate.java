@@ -9,6 +9,9 @@ package be.e_contract.ethereum.tool;
 public class TransactionTemplate {
 
     // optional
+    public String description;
+
+    // optional
     public String from;
 
     public String to;

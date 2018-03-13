@@ -33,7 +33,7 @@ import org.web3j.protocol.Web3j;
             Pending.class
         },
         versionProvider = VersionProvider.class,
-        footer = "Copyright (C) 2018 e-Contract.be BVBA",
+        footer = "Copyright (C) 2018 Frank Cornelis",
         separator = " "
 )
 public class Main implements Callable<Void> {

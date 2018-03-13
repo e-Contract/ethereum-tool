@@ -56,6 +56,9 @@ public class Sign implements Callable<Void> {
         }
         Gson gson = new Gson();
         TransactionTemplate transactionTemplate = gson.fromJson(new FileReader(this.templateFile), TransactionTemplate.class);
+        if (null != transactionTemplate.description) {
+            System.out.println("Description: " + transactionTemplate.description);
+        }
         System.out.println("to: " + transactionTemplate.to);
         System.out.println("value: " + transactionTemplate.value + " ether");
         System.out.println("gas price: " + transactionTemplate.gasPrice + " gwei");
