@@ -38,6 +38,8 @@ public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
             if (location.startsWith("http")) {
                 service = new HttpService(location);
             } else {
+                // https://github.com/web3j/web3j/pull/245
+                Output.warning("web3j IPC is not really stable");
                 service = new UnixIpcService(location);
             }
             web3 = Web3j.build(service);

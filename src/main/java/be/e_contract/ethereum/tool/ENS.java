@@ -47,6 +47,7 @@ public class ENS implements Callable<Void> {
             System.out.println("name: " + name);
             return null;
         }
+
         if (null != this.name) {
             String address = ensResolver.resolve(this.name);
             System.out.println("address: " + address);
