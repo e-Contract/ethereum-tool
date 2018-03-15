@@ -43,7 +43,8 @@ import org.web3j.protocol.Web3j;
             VersionCommand.class,
             Pending.class,
             History.class,
-            Update.class
+            Update.class,
+            ENS.class
         },
         versionProvider = VersionProvider.class,
         footer = "Copyright (C) 2018 Frank Cornelis",
