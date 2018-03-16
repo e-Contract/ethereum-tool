@@ -20,11 +20,14 @@ package be.e_contract.ethereum.tool;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
@@ -42,11 +45,14 @@ public class Speed implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        System.out.println("Takes a while for results getting to get in...");
         Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
         Map<BigInteger, Timing> gasPrices = new HashMap<>();
         this.web3.pendingTransactionObservable().subscribe(tx -> {
-            System.out.println("incoming pending transactions...");
             pendingTransactions.put(tx.getHash(), new PendingTransaction(tx.getGasPrice()));
+        }, error -> {
+            Output.error(error.getMessage());
+            error.printStackTrace();
         });
         this.web3.blockObservable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
@@ -62,11 +68,16 @@ public class Speed implements Callable<Void> {
                         timing = new Timing(pendingTransaction.created);
                         gasPrices.put(gasPrice, timing);
                     } else {
-                        timing.addTiming(pendingTransaction.created);
+                        // we should not be using "now" here, but the block timestamp
+                        BigInteger timestamp = block.getTimestamp();
+                        Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
+                        DateTime timestampDateTime = new DateTime(timestampDate);
+                        timing.addTiming(pendingTransaction.created, timestampDateTime);
                     }
                 }
             }
 
+            AnsiConsole.out.print(Ansi.ansi().reset().eraseScreen());
             List<Map.Entry<BigInteger, Timing>> gasPricesList = new ArrayList<>(gasPrices.entrySet());
             gasPricesList.sort((o1, o2) -> o1.getKey().compareTo(o2.getKey()));
             for (Map.Entry<BigInteger, Timing> gasPriceEntry : gasPricesList) {
@@ -74,7 +85,9 @@ public class Speed implements Callable<Void> {
                 System.out.println("gas price: " + gasPriceGwei + " gwei; average time: "
                         + gasPriceEntry.getValue().getAverageTime() / 1000 + " secs; tx count: " + gasPriceEntry.getValue().getCount());
             }
-            System.out.println("-----------------------------------------------------------------");
+        }, error -> {
+            Output.error(error.getMessage());
+            error.printStackTrace();
         });
         return null;
     }
@@ -92,7 +105,9 @@ public class Speed implements Callable<Void> {
             this.count++;
         }
 
-        public void addTiming(DateTime created) {
+        public void addTiming(DateTime created, DateTime blockTimestamp) {
+            // seems like blockTimestamp can be before created...
+            // so we still have to use now here
             DateTime now = new DateTime();
             Interval interval = new Interval(created, now);
             Duration duration = interval.toDuration();
