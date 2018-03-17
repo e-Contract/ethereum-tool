@@ -62,6 +62,10 @@ public class Speed implements Callable<Void> {
                 Transaction transaction = transactionObject.get();
                 String transactionHash = transaction.getHash();
                 PendingTransaction pendingTransaction = pendingTransactions.remove(transactionHash);
+                if (!transaction.getGas().equals(BigInteger.valueOf(21000))) {
+                    // we only want regular transactions
+                    continue;
+                }
                 if (pendingTransaction != null) {
                     BigInteger gasPrice = pendingTransaction.gasPrice;
                     Timing timing = gasPrices.get(gasPrice);
@@ -95,6 +99,14 @@ public class Speed implements Callable<Void> {
             List<Map.Entry<BigInteger, Timing>> gasPricesList = new ArrayList<>(gasPrices.entrySet());
             gasPricesList.sort((o1, o2) -> o1.getKey().compareTo(o2.getKey()));
             for (Map.Entry<BigInteger, Timing> gasPriceEntry : gasPricesList) {
+                if (gasPriceEntry.getValue().getCount() < 4) {
+                    // we want a usable average time
+                    continue;
+                }
+                if (count-- == 0) {
+                    //only show top of the list
+                    break;
+                }
                 switch (gasPrice.compareTo(gasPriceEntry.getKey())) {
                     case -1:
                         AnsiConsole.out.print(Ansi.ansi().fgBrightGreen());
@@ -105,10 +117,6 @@ public class Speed implements Callable<Void> {
                     case 1:
                         AnsiConsole.out.print(Ansi.ansi().fgBrightRed());
                         break;
-                }
-                if (count-- == 0) {
-                    //only show top of the list
-                    break;
                 }
                 BigDecimal gasPriceGwei = Convert.fromWei(new BigDecimal(gasPriceEntry.getKey()), Convert.Unit.GWEI);
                 System.out.print(gasPriceGwei);
@@ -137,13 +145,13 @@ public class Speed implements Callable<Void> {
             this.count++;
         }
 
-        public void addTiming(DateTime created, DateTime blockTimestamp) {
+        public synchronized void addTiming(DateTime created, DateTime blockTimestamp) {
             // seems like blockTimestamp can be before created...
             // so we still have to use now here
             DateTime now = new DateTime();
             Interval interval = new Interval(created, now);
             Duration duration = interval.toDuration();
-            this.totalTime.plus(duration);
+            this.totalTime = this.totalTime.plus(duration);
             this.count++;
         }
 

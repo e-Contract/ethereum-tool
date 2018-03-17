@@ -31,7 +31,7 @@ public class TransactionTemplate {
     public double value;
 
     // unit: gwei
-    public int gasPrice;
+    public double gasPrice;
 
     public long nonce;
 

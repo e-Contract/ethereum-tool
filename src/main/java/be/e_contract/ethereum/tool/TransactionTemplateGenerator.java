@@ -59,7 +59,7 @@ public class TransactionTemplateGenerator {
         transactionTemplate.from = address;
         transactionTemplate.to = "place destination address here";
         transactionTemplate.chainId = 1; // Ethereum mainnet
-        transactionTemplate.gasPrice = 3;
+        transactionTemplate.gasPrice = 2;
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String transactionTemplateJSon = gson.toJson(transactionTemplate);
         FileUtils.writeStringToFile(templateFile, transactionTemplateJSon, "UTF-8");
