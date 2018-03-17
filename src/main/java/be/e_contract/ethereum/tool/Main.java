@@ -18,6 +18,8 @@
 package be.e_contract.ethereum.tool;
 
 import java.util.concurrent.Callable;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 import org.web3j.protocol.Web3j;
 
 /**
@@ -54,6 +56,14 @@ import org.web3j.protocol.Web3j;
 public class Main implements Callable<Void> {
 
     public static void main(String[] args) throws Exception {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                AnsiConsole.out.print(Ansi.ansi().reset());
+                System.out.println();
+            }
+
+        });
         picocli.CommandLine commandLine = new picocli.CommandLine(new Main());
         commandLine.registerConverter(Web3j.class, new Web3TypeConverter());
         commandLine.parseWithHandler(new picocli.CommandLine.RunLast(), System.out, args);

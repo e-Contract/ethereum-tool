@@ -17,6 +17,7 @@
  */
 package be.e_contract.ethereum.tool;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -77,13 +78,44 @@ public class Speed implements Callable<Void> {
                 }
             }
 
-            AnsiConsole.out.print(Ansi.ansi().reset().eraseScreen());
+            BigInteger gasPrice;
+            try {
+                gasPrice = this.web3.ethGasPrice().send().getGasPrice();
+            } catch (IOException ex) {
+                Output.error("error: " + ex.getMessage());
+                return;
+            }
+            AnsiConsole.out.print(Ansi.ansi().reset().eraseScreen().cursor(0, 0));
+            int count = 40;
+            System.out.print("gas price (gwei)");
+            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
+            System.out.print("average time (sec)");
+            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
+            System.out.println("tx count");
             List<Map.Entry<BigInteger, Timing>> gasPricesList = new ArrayList<>(gasPrices.entrySet());
             gasPricesList.sort((o1, o2) -> o1.getKey().compareTo(o2.getKey()));
             for (Map.Entry<BigInteger, Timing> gasPriceEntry : gasPricesList) {
+                switch (gasPrice.compareTo(gasPriceEntry.getKey())) {
+                    case -1:
+                        AnsiConsole.out.print(Ansi.ansi().fgBrightGreen());
+                        break;
+                    case 0:
+                        AnsiConsole.out.print(Ansi.ansi().fgBrightYellow());
+                        break;
+                    case 1:
+                        AnsiConsole.out.print(Ansi.ansi().fgBrightRed());
+                        break;
+                }
+                if (count-- == 0) {
+                    //only show top of the list
+                    break;
+                }
                 BigDecimal gasPriceGwei = Convert.fromWei(new BigDecimal(gasPriceEntry.getKey()), Convert.Unit.GWEI);
-                System.out.println("gas price: " + gasPriceGwei + " gwei; average time: "
-                        + gasPriceEntry.getValue().getAverageTime() / 1000 + " secs; tx count: " + gasPriceEntry.getValue().getCount());
+                System.out.print(gasPriceGwei);
+                AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
+                System.out.print(gasPriceEntry.getValue().getAverageTime());
+                AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
+                System.out.println(gasPriceEntry.getValue().getCount());
             }
         }, error -> {
             Output.error(error.getMessage());
@@ -116,7 +148,7 @@ public class Speed implements Callable<Void> {
         }
 
         public long getAverageTime() {
-            return this.totalTime.dividedBy(this.count).getMillis();
+            return this.totalTime.dividedBy(this.count).getStandardSeconds();
         }
 
         public int getCount() {

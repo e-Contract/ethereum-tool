@@ -26,6 +26,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
+import org.web3j.utils.Async;
 import picocli.CommandLine;
 
 public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
@@ -42,7 +43,8 @@ public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
                 Output.warning("web3j IPC is not really stable");
                 service = new UnixIpcService(location);
             }
-            web3 = Web3j.build(service);
+            // poll every hald second
+            web3 = Web3j.build(service, 500, Async.defaultExecutorService());
         } catch (Exception e) {
             Output.error("Could not connect to node: " + location);
             Output.error("Error: " + e.getMessage());
