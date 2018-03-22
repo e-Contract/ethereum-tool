@@ -17,13 +17,18 @@
  */
 package be.e_contract.ethereum.tool;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.concurrent.Callable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.web3j.protocol.Web3j;
 import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "gasprice", description = "retrieve the average gas price", separator = " ")
+@CommandLine.Command(name = "gasprice", description = "retrieve the gas price", separator = " ")
 public class GasPrice implements Callable<Void> {
 
     @CommandLine.Option(names = {"-l", "--location"}, required = true, description = "the location of the client node")
@@ -35,6 +40,26 @@ public class GasPrice implements Callable<Void> {
         System.out.println("gas price: " + gasPriceWei + " wei");
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
         System.out.println("gas price: " + gasPriceGwei + " Gwei");
+
+        OkHttpClient httpClient = new OkHttpClient();
+        Request request = new Request.Builder().url("https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=EUR").build();
+        Response response = httpClient.newCall(request).execute();
+        ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        CoinmarketcapTickerResponse[] coinmarketcapTickerResponse
+                = objectMapper.readValue(response.body().byteStream(), CoinmarketcapTickerResponse[].class);
+        BigDecimal priceUsd = BigDecimal.valueOf(coinmarketcapTickerResponse[0].priceUsd);
+        BigDecimal priceEur = BigDecimal.valueOf(coinmarketcapTickerResponse[0].priceEur);
+        System.out.println("Ether price: " + priceUsd + " USD");
+        System.out.println("Ether price: " + priceEur + " EUR");
+
+        BigDecimal gasUsed = BigDecimal.valueOf(21000);
+        System.out.println("gas used on regular transaction: " + gasUsed);
+        BigDecimal gasPriceEther = Convert.fromWei(gasPriceWei, Convert.Unit.ETHER);
+        BigDecimal costEther = gasUsed.multiply(gasPriceEther);
+        BigDecimal costUsd = costEther.multiply(priceUsd);
+        BigDecimal costEur = costEther.multiply(priceEur);
+        System.out.println("cost regular transaction: " + costUsd + " USD");
+        System.out.println("cost regular transaction: " + costEur + " EUR");
         return null;
     }
 }
