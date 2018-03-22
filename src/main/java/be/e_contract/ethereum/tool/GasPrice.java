@@ -36,6 +36,7 @@ public class GasPrice implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        // calculates on latest blocks median gas price
         BigDecimal gasPriceWei = BigDecimal.valueOf(this.web3.ethGasPrice().send().getGasPrice().longValueExact());
         System.out.println("gas price: " + gasPriceWei + " wei");
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
