@@ -51,7 +51,7 @@ import org.web3j.protocol.Web3j;
             Miners.class
         },
         versionProvider = VersionProvider.class,
-        footer = "Copyright (C) 2018 Frank Cornelis",
+        footer = "Copyright (C) 2018 Frank Cornelis\nDonations: " + Version.DONATION,
         separator = " "
 )
 public class Main implements Callable<Void> {

@@ -24,6 +24,8 @@ public class Version {
 
     private final static String IMPLEMENTATION_VERSION;
 
+    public final static String DONATION = "0x0c56073db91c2ba57ff362301eb32262bbee6147";
+
     static {
         Properties properties = new Properties();
         try {

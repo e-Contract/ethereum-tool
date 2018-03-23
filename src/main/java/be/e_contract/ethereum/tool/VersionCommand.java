@@ -26,6 +26,7 @@ public class VersionCommand implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         System.out.println("Version: " + Version.getImplementationVersion());
+        System.out.println("Donations: " + Version.DONATION);
         return null;
     }
 }
