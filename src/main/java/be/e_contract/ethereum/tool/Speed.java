@@ -50,6 +50,7 @@ public class Speed implements Callable<Void> {
         Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
         Map<BigInteger, Timing> gasPrices = new HashMap<>();
         this.web3.pendingTransactionObservable().subscribe(tx -> {
+            // we don't know the transaction type (regular or contract) here yet, so we add everything here
             pendingTransactions.put(tx.getHash(), new PendingTransaction(tx.getGasPrice()));
         }, error -> {
             Output.error(error.getMessage());
@@ -57,34 +58,44 @@ public class Speed implements Callable<Void> {
         });
         this.web3.blockObservable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
+            boolean updated = false;
             for (EthBlock.TransactionResult<EthBlock.TransactionObject> transactionResult : block.getTransactions()) {
                 EthBlock.TransactionObject transactionObject = transactionResult.get();
                 Transaction transaction = transactionObject.get();
                 String transactionHash = transaction.getHash();
+                // remove the transaction, independent of the transaction type (regular or contract)
                 PendingTransaction pendingTransaction = pendingTransactions.remove(transactionHash);
                 if (!transaction.getGas().equals(BigInteger.valueOf(21000))) {
-                    // we only want regular transactions
+                    // we only want stats on regular transactions
                     continue;
                 }
-                if (pendingTransaction != null) {
-                    BigInteger gasPrice = pendingTransaction.gasPrice;
-                    Timing timing = gasPrices.get(gasPrice);
-                    if (null == timing) {
-                        timing = new Timing(pendingTransaction.created);
-                        gasPrices.put(gasPrice, timing);
-                    } else {
-                        // we should not be using "now" here, but the block timestamp
-                        BigInteger timestamp = block.getTimestamp();
-                        Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
-                        DateTime timestampDateTime = new DateTime(timestampDate);
-                        timing.addTiming(pendingTransaction.created, timestampDateTime);
-                    }
+                if (null == pendingTransaction) {
+                    // transaction was not known as a pending one before
+                    continue;
+                }
+                updated = true;
+                BigInteger gasPrice = pendingTransaction.gasPrice;
+                Timing timing = gasPrices.get(gasPrice);
+                if (null == timing) {
+                    timing = new Timing(pendingTransaction.created);
+                    gasPrices.put(gasPrice, timing);
+                } else {
+                    // we should not be using "now" here, but the block timestamp
+                    BigInteger timestamp = block.getTimestamp();
+                    Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
+                    DateTime timestampDateTime = new DateTime(timestampDate);
+                    timing.addTiming(pendingTransaction.created, timestampDateTime);
                 }
             }
 
-            BigInteger gasPrice;
+            if (!updated) {
+                // only redo the table on changes
+                return;
+            }
+
+            BigInteger nodeGasPrice;
             try {
-                gasPrice = this.web3.ethGasPrice().send().getGasPrice();
+                nodeGasPrice = this.web3.ethGasPrice().send().getGasPrice();
             } catch (IOException ex) {
                 Output.error("error: " + ex.getMessage());
                 return;
@@ -97,6 +108,7 @@ public class Speed implements Callable<Void> {
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
             System.out.println("tx count");
             List<Map.Entry<BigInteger, Timing>> gasPricesList = new ArrayList<>(gasPrices.entrySet());
+            // sort on gas price
             gasPricesList.sort((o1, o2) -> o1.getKey().compareTo(o2.getKey()));
             for (Map.Entry<BigInteger, Timing> gasPriceEntry : gasPricesList) {
                 if (gasPriceEntry.getValue().getCount() < 4) {
@@ -107,7 +119,7 @@ public class Speed implements Callable<Void> {
                     //only show top of the list
                     break;
                 }
-                switch (gasPrice.compareTo(gasPriceEntry.getKey())) {
+                switch (nodeGasPrice.compareTo(gasPriceEntry.getKey())) {
                     case -1:
                         AnsiConsole.out.print(Ansi.ansi().fgBrightGreen());
                         break;
@@ -147,7 +159,7 @@ public class Speed implements Callable<Void> {
         }
 
         public synchronized void addTiming(DateTime created, DateTime blockTimestamp) {
-            // seems like blockTimestamp can be before created...
+            // seems like blockTimestamp can be before created in the beginning...
             // so we still have to use now here
             DateTime now = new DateTime();
             Interval interval = new Interval(created, now);

@@ -93,6 +93,10 @@ public class Confirm implements Callable<Void> {
             return null;
         }
         TransactionReceipt transactionReceipt = transactionReceiptOptional.get();
+        if (!"0x1".equals(transactionReceipt.getStatus())) {
+            Output.error("Transaction has failed with status: " + transactionReceipt.getStatus());
+            return null;
+        }
         System.out.println("From: " + transactionReceipt.getFrom());
         System.out.println("To: " + transactionReceipt.getTo());
         BigInteger transactionBlockNumber = transactionReceipt.getBlockNumber();
@@ -122,6 +126,9 @@ public class Confirm implements Callable<Void> {
         BigDecimal transactionCostWei = gasUsed.multiply(gasPriceWei);
         BigDecimal transactionCostEther = Convert.fromWei(transactionCostWei, Convert.Unit.ETHER);
         System.out.println("transaction cost: " + transactionCostEther + " ether");
+        BigInteger balance = this.web3.ethGetBalance(transactionReceipt.getFrom(), DefaultBlockParameterName.LATEST).send().getBalance();
+        BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
+        System.out.println("balance from address: " + balanceEther + " ether");
         return null;
     }
 }
