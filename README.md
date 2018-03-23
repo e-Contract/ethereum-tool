@@ -3,6 +3,11 @@ Ethereum Tool
 
 Command line tool for offline template-based transaction signing.
 
+If you like this tool, please consider a donation at:
+```
+0x0c56073db91c2ba57ff362301eb32262bbee6147
+```
+
 
 # Installation
 
@@ -109,3 +114,14 @@ Check the status of the transaction via:
 ```
 ethereum-tool confirm -l http://localhost:8545 -f transaction
 ```
+
+
+# Development
+
+Build the project via Maven:
+```
+mvn clean install
+```
+
+We use Netbeans as IDE.
+If you send pull requests, please keep the code clean to ease the review process.
