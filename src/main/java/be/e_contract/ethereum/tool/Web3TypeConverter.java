@@ -43,7 +43,7 @@ public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
                 Output.warning("web3j IPC is not really stable");
                 service = new UnixIpcService(location);
             }
-            // poll every hald second
+            // poll every half second
             web3 = Web3j.build(service, 500, Async.defaultExecutorService());
         } catch (Exception e) {
             Output.error("Could not connect to node: " + location);
@@ -51,26 +51,31 @@ public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
             System.exit(1);
             throw new RuntimeException(e);
         }
-        if (web3.ethSyncing().send().isSyncing()) {
-            Output.warning("Node is still syncing.");
-            Output.warning("Results will be inaccurate!");
-        }
+
         BigInteger peerCount = web3.netPeerCount().send().getQuantity();
         if (BigInteger.ZERO.equals(peerCount)) {
             Output.warning("Node has no peers.");
             Output.warning("Node probably just started.");
             Output.warning("Results will be inaccurate!");
         }
-        EthBlock.Block block = web3.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
-        BigInteger timestamp = block.getTimestamp();
-        Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
-        DateTime timestampDateTime = new DateTime(timestampDate);
-        DateTime now = new DateTime();
-        if (timestampDateTime.plusMinutes(1).isBefore(now)) {
-            Output.warning("latest block is more than 1 minute old.");
-            Output.warning("Node might be out-of-sync.");
-            Output.warning("Results might be inaccurate.");
+
+        if (web3.ethSyncing().send().isSyncing()) {
+            Output.warning("Node is still syncing.");
+            Output.warning("Results will be inaccurate!");
+        } else {
+            // not every node reports syncing status correctly, so also check latest block timestamp
+            EthBlock.Block block = web3.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
+            BigInteger timestamp = block.getTimestamp();
+            Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
+            DateTime timestampDateTime = new DateTime(timestampDate);
+            DateTime now = new DateTime();
+            if (timestampDateTime.plusMinutes(1).isBefore(now)) {
+                Output.warning("latest block is more than 1 minute old.");
+                Output.warning("Node might be out-of-sync.");
+                Output.warning("Results might be inaccurate.");
+            }
         }
+
         return web3;
     }
 }

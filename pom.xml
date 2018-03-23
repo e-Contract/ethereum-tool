@@ -217,7 +217,7 @@
             <dependency>
                 <groupId>org.ethereum</groupId>
                 <artifactId>ethereumj-core</artifactId>
-                <version>1.7.0-SNAPSHOT</version>
+                <version>1.7.0-RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
@@ -304,14 +304,6 @@
         <repository>
             <id>ethereumj</id>
             <url>https://dl.bintray.com/ethereum/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-        </repository>
-        <repository>
-            <id>ethereumj-snapshot</id>
-            <url>http://oss.jfrog.org/oss-snapshot-local/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>

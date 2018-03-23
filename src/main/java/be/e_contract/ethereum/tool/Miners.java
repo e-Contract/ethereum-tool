@@ -17,6 +17,7 @@
  */
 package be.e_contract.ethereum.tool;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,10 +26,11 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
-import org.web3j.ens.EnsResolver;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "miners", description = "Show information on miners", separator = " ")
@@ -65,19 +67,19 @@ public class Miners implements Callable<Void> {
         AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
         System.out.print("% of blocks");
         AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
-        System.out.println("miner");
-        EnsResolver ensResolver = new EnsResolver(this.web3);
+        System.out.print("miner");
+        AnsiConsole.out.print(Ansi.ansi().cursorToColumn(90));
+        System.out.println("balance (ether)");
         for (Miner miner : minerList) {
             System.out.print(miner.blocks);
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
             System.out.print((double) miner.blocks / this.n * 100);
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
             System.out.print(miner.address);
-            //String name = ensResolver.reverseResolve(miner.address);
-            //if (null != name) {
-            //    System.out.print(" " + name);
-            //}
-            System.out.println();
+            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(90));
+            BigDecimal balance = new BigDecimal(this.web3.ethGetBalance(miner.address, DefaultBlockParameterName.LATEST).send().getBalance());
+            BigDecimal balanceEther = Convert.fromWei(balance, Convert.Unit.ETHER);
+            System.out.println(balanceEther);
         }
         return null;
     }

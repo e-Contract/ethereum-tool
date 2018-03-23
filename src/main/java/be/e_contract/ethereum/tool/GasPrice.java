@@ -61,6 +61,8 @@ public class GasPrice implements Callable<Void> {
         BigDecimal costEur = costEther.multiply(priceEur);
         System.out.println("cost regular transaction: " + costUsd + " USD");
         System.out.println("cost regular transaction: " + costEur + " EUR");
+        Output.warning("This displayed gas price is the price reported by the node itself.");
+        Output.warning("This is not necessarily the sharpest price possible on the network.");
         return null;
     }
 }

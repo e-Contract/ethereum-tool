@@ -125,6 +125,7 @@ public class Speed implements Callable<Void> {
                 AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
                 System.out.println(gasPriceEntry.getValue().getCount());
             }
+            // TODO: we should implement a "sliding window" here
         }, error -> {
             Output.error(error.getMessage());
             error.printStackTrace();
