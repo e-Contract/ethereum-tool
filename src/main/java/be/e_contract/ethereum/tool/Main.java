@@ -48,7 +48,8 @@ import org.web3j.protocol.Web3j;
             Update.class,
             ENS.class,
             Speed.class,
-            Miners.class
+            Miners.class,
+            Trace.class
         },
         versionProvider = VersionProvider.class,
         footer = "Copyright (C) 2018 Frank Cornelis\nDonations: " + Version.DONATION,

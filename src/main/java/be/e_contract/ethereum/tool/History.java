@@ -46,6 +46,7 @@ public class History implements Callable<Void> {
         System.out.println("scanning from block " + blockNumber + " down to block " + blockNumber.subtract(BigInteger.valueOf(this.n)) + " ...");
         // cannot use transaction count here as we would then miss incoming transactions
         // also cannot use "historical" balance has we might receive "missing trie node" errors
+        this.address = this.address.toLowerCase();
         while (this.n > 0) {
             EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
             for (EthBlock.TransactionResult transactionResult : block.getTransactions()) {

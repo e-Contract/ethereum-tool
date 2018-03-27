@@ -66,7 +66,7 @@ public class Confirm implements Callable<Void> {
             byte[] rawData = Numeric.hexStringToByteArray(transactionHex);
             _transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
         } else {
-            _transactionHash = this.transactionHash;
+            _transactionHash = this.transactionHash.toLowerCase();
         }
         System.out.println("transaction hash: " + _transactionHash);
         EthGetTransactionReceipt getTransactionReceipt = this.web3.ethGetTransactionReceipt(_transactionHash).send();
