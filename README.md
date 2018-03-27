@@ -68,7 +68,7 @@ Copy the transaction template to a `transaction.json` file to prepare a new tran
 You need to change some fields within the `transaction.json` file.
 
 First of all the nonce need to be set correct.
-Retrieve the corrent nonce of your address via:
+Retrieve the correct nonce of your address via:
 ```
 ethereum-tool nonce -l http://localhost:8545 -a your_address_here
 ```

@@ -126,9 +126,12 @@ public class Confirm implements Callable<Void> {
         BigDecimal transactionCostWei = gasUsed.multiply(gasPriceWei);
         BigDecimal transactionCostEther = Convert.fromWei(transactionCostWei, Convert.Unit.ETHER);
         System.out.println("transaction cost: " + transactionCostEther + " ether");
-        BigInteger balance = this.web3.ethGetBalance(transactionReceipt.getFrom(), DefaultBlockParameterName.LATEST).send().getBalance();
-        BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
-        System.out.println("balance from address: " + balanceEther + " ether");
+        BigInteger fromBalance = this.web3.ethGetBalance(transactionReceipt.getFrom(), DefaultBlockParameterName.LATEST).send().getBalance();
+        BigDecimal fromBalanceEther = Convert.fromWei(new BigDecimal(fromBalance), Convert.Unit.ETHER);
+        System.out.println("balance from address: " + fromBalanceEther + " ether");
+        BigInteger toBalance = this.web3.ethGetBalance(transactionReceipt.getTo(), DefaultBlockParameterName.LATEST).send().getBalance();
+        BigDecimal toBalanceEther = Convert.fromWei(new BigDecimal(toBalance), Convert.Unit.ETHER);
+        System.out.println("balance to address: " + toBalanceEther + " ether");
         return null;
     }
 }

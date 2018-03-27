@@ -17,9 +17,14 @@
  */
 package be.e_contract.ethereum.tool;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.utils.Convert;
@@ -41,6 +46,23 @@ public class Balance implements Callable<Void> {
         BigInteger balance = this.web3.ethGetBalance(this.address, DefaultBlockParameterName.LATEST).send().getBalance();
         BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
         System.out.println("balance: " + balanceEther + " ether");
+
+        OkHttpClient httpClient = new OkHttpClient();
+        Request request = new Request.Builder().url("https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=EUR").build();
+        Response response = httpClient.newCall(request).execute();
+        ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        CoinmarketcapTickerResponse[] coinmarketcapTickerResponse
+                = objectMapper.readValue(response.body().byteStream(), CoinmarketcapTickerResponse[].class);
+        BigDecimal priceUsd = BigDecimal.valueOf(coinmarketcapTickerResponse[0].priceUsd);
+        BigDecimal priceEur = BigDecimal.valueOf(coinmarketcapTickerResponse[0].priceEur);
+        System.out.println("Ether price: " + priceUsd + " USD");
+        System.out.println("Ether price: " + priceEur + " EUR");
+
+        BigDecimal balanceUsd = balanceEther.multiply(priceUsd);
+        BigDecimal balanceEur = balanceEther.multiply(priceEur);
+        System.out.println("balance: " + balanceUsd + " USD");
+        System.out.println("balance: " + balanceEur + " EUR");
+
         return null;
     }
 }

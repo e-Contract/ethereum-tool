@@ -53,7 +53,7 @@ public class History implements Callable<Void> {
                 Transaction transaction = transactionObject.get();
                 if (this.address.equals(transaction.getFrom())
                         || this.address.equals(transaction.getTo())) {
-                    Output.printlnBold("transaction hash: " + transaction.getBlockHash());
+                    Output.printlnBold("transaction hash: " + transaction.getHash());
                     Output.println(10, "From: " + transaction.getFrom());
                     Output.println(10, "To: " + transaction.getTo());
                     Output.println(10, "Value: " + Convert.fromWei(new BigDecimal(transaction.getValue()), Convert.Unit.ETHER) + " ether");
