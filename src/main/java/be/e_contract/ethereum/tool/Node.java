@@ -17,13 +17,21 @@
  */
 package be.e_contract.ethereum.tool;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.Transaction;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "node", description = "display node information", separator = " ")
 public class Node implements Callable<Void> {
+
+    private static final int CHAIN_ID_INC = 35;
+    private static final int LOWER_REAL_V = 27;
 
     @CommandLine.Option(names = {"-l", "--location"}, required = true, description = "the location of the client node")
     private Web3j web3;
@@ -43,9 +51,35 @@ public class Node implements Callable<Void> {
         boolean syncing = this.web3.ethSyncing().send().isSyncing();
         System.out.println("Syncing: " + syncing);
         String version = this.web3.netVersion().send().getNetVersion();
-        System.out.println("Version: " + version);
+        System.out.println("network version: " + version);
         BigInteger peerCount = this.web3.netPeerCount().send().getQuantity();
         System.out.println("Peer count: " + peerCount);
+        Integer chainId = getChainId();
+        if (null != chainId) {
+            System.out.println("chain id: " + chainId);
+        }
+        return null;
+    }
+
+    private Integer getChainId() throws IOException {
+        BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
+        while (!blockNumber.equals(BigInteger.ZERO)) {
+            EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
+            List<EthBlock.TransactionResult> transactions = block.getTransactions();
+            if (!transactions.isEmpty()) {
+                EthBlock.TransactionResult transactionResult = transactions.get(0);
+                EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
+                Transaction transaction = transactionObject.get();
+                int v = transaction.getV();
+                if (v == LOWER_REAL_V || v == (LOWER_REAL_V + 1)) {
+                    return null;
+                }
+                Integer chainId = (v - CHAIN_ID_INC) / 2;
+                return chainId;
+            }
+            blockNumber = blockNumber.subtract(BigInteger.ONE);
+        }
+        Output.error("could not determine chain id");
         return null;
     }
 }
