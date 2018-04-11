@@ -93,7 +93,7 @@ public class Confirm implements Callable<Void> {
             return null;
         }
         TransactionReceipt transactionReceipt = transactionReceiptOptional.get();
-        if (!"0x1".equals(transactionReceipt.getStatus())) {
+        if (!isStatusOK(transactionReceipt)) {
             Output.error("Transaction has failed with status: " + transactionReceipt.getStatus());
             return null;
         }
@@ -133,5 +133,14 @@ public class Confirm implements Callable<Void> {
         BigDecimal toBalanceEther = Convert.fromWei(new BigDecimal(toBalance), Convert.Unit.ETHER);
         System.out.println("Balance to address: " + toBalanceEther + " ether");
         return null;
+    }
+
+    private boolean isStatusOK(TransactionReceipt transactionReceipt) {
+        String status = transactionReceipt.getStatus();
+        if (null == status) {
+            return true;
+        }
+        BigInteger statusQuantity = Numeric.decodeQuantity(status);
+        return BigInteger.ONE.equals(statusQuantity);
     }
 }
