@@ -47,16 +47,16 @@ public class Node implements Callable<Void> {
             System.out.println("Hash rate: " + hashRate);
         }
         String protocolVersion = this.web3.ethProtocolVersion().send().getProtocolVersion();
-        System.out.println("protocol version: " + protocolVersion);
+        System.out.println("Protocol version: " + protocolVersion);
         boolean syncing = this.web3.ethSyncing().send().isSyncing();
         System.out.println("Syncing: " + syncing);
         String version = this.web3.netVersion().send().getNetVersion();
-        System.out.println("network version: " + version);
+        System.out.println("Network version: " + version);
         BigInteger peerCount = this.web3.netPeerCount().send().getQuantity();
         System.out.println("Peer count: " + peerCount);
         Integer chainId = getChainId();
         if (null != chainId) {
-            System.out.println("chain id: " + chainId);
+            System.out.println("Chain id: " + chainId);
         }
         return null;
     }
@@ -79,7 +79,7 @@ public class Node implements Callable<Void> {
             }
             blockNumber = blockNumber.subtract(BigInteger.ONE);
         }
-        Output.error("could not determine chain id");
+        Output.error("Could not determine chain id");
         return null;
     }
 }

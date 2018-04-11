@@ -32,7 +32,7 @@ public class Version {
             properties.load(Version.class
                     .getResourceAsStream("/ethereum-tool-version.properties"));
         } catch (IOException e) {
-            throw new RuntimeException("could not load ethereum-tool-version.properties");
+            throw new RuntimeException("Could not load ethereum-tool-version.properties");
         }
         IMPLEMENTATION_VERSION = properties.getProperty("implementation.version");
     }

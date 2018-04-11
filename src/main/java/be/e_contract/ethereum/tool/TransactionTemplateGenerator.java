@@ -38,17 +38,17 @@ public class TransactionTemplateGenerator {
         }
         if (this.publicDirectory.exists()) {
             if (!this.publicDirectory.isDirectory()) {
-                Output.error("public destination not a directory");
+                Output.error("Public destination not a directory");
                 return;
             }
         } else if (!this.publicDirectory.mkdirs()) {
-            Output.error("could not create public destination directory");
+            Output.error("Could not create public destination directory");
             return;
         }
         File templateFile = new File(this.publicDirectory, "transaction-template-" + address + ".json");
         if (templateFile.exists()) {
             Console console = System.console();
-            System.out.println("existing template file: " + templateFile.getName());
+            System.out.println("Existing template file: " + templateFile.getName());
             boolean confirmation = askConfirmation(console, "Overwrite output file? (y/n)");
             if (!confirmation) {
                 return;
@@ -63,7 +63,7 @@ public class TransactionTemplateGenerator {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String transactionTemplateJSon = gson.toJson(transactionTemplate);
         FileUtils.writeStringToFile(templateFile, transactionTemplateJSon, "UTF-8");
-        System.out.println("transaction template file: " + templateFile.getName());
+        System.out.println("Transaction template file: " + templateFile.getName());
     }
 
     private boolean askConfirmation(Console console, String message) {

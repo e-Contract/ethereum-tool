@@ -37,20 +37,20 @@ public class ENS implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (this.name == null && this.address == null) {
-            Output.error("provide name or address");
+            Output.error("Provide name or address");
             picocli.CommandLine.usage(this, System.out);
             return null;
         }
         EnsResolver ensResolver = new EnsResolver(this.web3);
         if (null != this.address) {
             String name = ensResolver.reverseResolve(this.address);
-            System.out.println("name: " + name);
+            System.out.println("Name: " + name);
             return null;
         }
 
         if (null != this.name) {
             String address = ensResolver.resolve(this.name);
-            System.out.println("address: " + address);
+            System.out.println("Address: " + address);
             return null;
         }
         return null;

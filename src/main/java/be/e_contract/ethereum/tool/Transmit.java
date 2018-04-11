@@ -37,7 +37,7 @@ public class Transmit implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (!this.transactionFile.exists()) {
-            Output.error("transaction file not found");
+            Output.error("Transaction file not found");
             return null;
         }
         String transactionHex = FileUtils.readFileToString(this.transactionFile, "UTF-8");
@@ -45,11 +45,11 @@ public class Transmit implements Callable<Void> {
         if (ethSendTransaction.hasError()) {
             Response.Error error = ethSendTransaction.getError();
             String errorMessage = error.getMessage();
-            Output.error("error: " + errorMessage);
+            Output.error("Error: " + errorMessage);
             return null;
         }
         String transactionHash = ethSendTransaction.getTransactionHash();
-        System.out.println("transaction hash: " + transactionHash);
+        System.out.println("Transaction hash: " + transactionHash);
         return null;
     }
 }

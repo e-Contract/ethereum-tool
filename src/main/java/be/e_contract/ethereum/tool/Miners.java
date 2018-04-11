@@ -45,7 +45,7 @@ public class Miners implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
-        System.out.println("scanning from block " + blockNumber + " down to block " + blockNumber.subtract(BigInteger.valueOf(this.n)) + " ...");
+        System.out.println("Scanning from block " + blockNumber + " down to block " + blockNumber.subtract(BigInteger.valueOf(this.n)) + " ...");
         Map<String, Miner> miners = new HashMap<>();
         int count = this.n;
         while (count > 0) {
@@ -63,13 +63,13 @@ public class Miners implements Callable<Void> {
         }
         List<Miner> minerList = new ArrayList<>(miners.values());
         minerList.sort((o1, o2) -> Integer.compare(o2.getBlocks(), o1.getBlocks()));
-        System.out.print("number of blocks");
+        System.out.print("Number of blocks");
         AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
         System.out.print("% of blocks");
         AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
-        System.out.print("miner");
+        System.out.print("Miner");
         AnsiConsole.out.print(Ansi.ansi().cursorToColumn(90));
-        System.out.println("balance (ether)");
+        System.out.println("Balance (ether)");
         for (Miner miner : minerList) {
             System.out.print(miner.blocks);
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));

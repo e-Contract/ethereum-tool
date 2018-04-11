@@ -37,33 +37,33 @@ public class Inspect implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (!this.transactionFile.exists()) {
-            Output.error("transaction file not found");
+            Output.error("Transaction file not found");
             return null;
         }
         String hexData = FileUtils.readFileToString(this.transactionFile, "UTF-8");
         byte[] rawData = Numeric.hexStringToByteArray(hexData);
         String transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
-        System.out.println("transaction hash: " + transactionHash);
+        System.out.println("Transaction hash: " + transactionHash);
         Transaction transaction = new Transaction(rawData);
         transaction.verify();
         String from = Numeric.toHexString(transaction.getSender());
         String to = Numeric.toHexString(transaction.getReceiveAddress());
-        System.out.println("from: " + from);
-        System.out.println("to: " + to);
+        System.out.println("From: " + from);
+        System.out.println("To: " + to);
         Integer chainId = transaction.getChainId();
         if (null != chainId) {
-            System.out.println("chain id: " + chainId);
+            System.out.println("Chain id: " + chainId);
         }
         BigInteger nonce = new BigInteger(transaction.getNonce());
-        System.out.println("nonce: " + nonce);
+        System.out.println("Nonce: " + nonce);
         BigDecimal valueWei = new BigDecimal(new BigInteger(1, transaction.getValue()));
         BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
-        System.out.println("value: " + valueEther + " ether");
+        System.out.println("Value: " + valueEther + " ether");
         BigDecimal gasLimitWei = new BigDecimal(new BigInteger(1, transaction.getGasLimit()));
-        System.out.println("gas limit: " + gasLimitWei + " wei");
+        System.out.println("Gas limit: " + gasLimitWei + " wei");
         BigDecimal gasPriceWei = new BigDecimal(new BigInteger(1, transaction.getGasPrice()));
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
-        System.out.println("gas price: " + gasPriceGwei + " gwei");
+        System.out.println("Gas price: " + gasPriceGwei + " gwei");
         return null;
     }
 }

@@ -34,7 +34,7 @@ public class Pending implements Callable<Void> {
         EthBlock pendingEthBlock = this.web3.ethGetBlockByNumber(DefaultBlockParameterName.PENDING, true).send();
         EthBlock.Block pendingBlock = pendingEthBlock.getBlock();
         int pendingTransactionCount = pendingBlock.getTransactions().size();
-        System.out.println("number of pending transactions: " + pendingTransactionCount);
+        System.out.println("Number of pending transactions: " + pendingTransactionCount);
         return null;
     }
 }

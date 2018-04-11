@@ -42,10 +42,10 @@ public class Balance implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         BigInteger transactionCount = this.web3.ethGetTransactionCount(this.address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
-        System.out.println("transaction count: " + transactionCount);
+        System.out.println("Transaction count: " + transactionCount);
         BigInteger balance = this.web3.ethGetBalance(this.address, DefaultBlockParameterName.LATEST).send().getBalance();
         BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
-        System.out.println("balance: " + balanceEther + " ether");
+        System.out.println("Balance: " + balanceEther + " ether");
 
         OkHttpClient httpClient = new OkHttpClient();
         Request request = new Request.Builder().url("https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=EUR").build();
@@ -60,8 +60,8 @@ public class Balance implements Callable<Void> {
 
         BigDecimal balanceUsd = balanceEther.multiply(priceUsd);
         BigDecimal balanceEur = balanceEther.multiply(priceEur);
-        System.out.println("balance: " + balanceUsd + " USD");
-        System.out.println("balance: " + balanceEur + " EUR");
+        System.out.println("Balance: " + balanceUsd + " USD");
+        System.out.println("Balance: " + balanceEur + " EUR");
 
         return null;
     }

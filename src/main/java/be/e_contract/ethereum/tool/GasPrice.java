@@ -38,9 +38,9 @@ public class GasPrice implements Callable<Void> {
     public Void call() throws Exception {
         // calculates on latest blocks median gas price
         BigDecimal gasPriceWei = BigDecimal.valueOf(this.web3.ethGasPrice().send().getGasPrice().longValueExact());
-        System.out.println("gas price: " + gasPriceWei + " wei");
+        System.out.println("Gas price: " + gasPriceWei + " wei");
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
-        System.out.println("gas price: " + gasPriceGwei + " Gwei");
+        System.out.println("Gas price: " + gasPriceGwei + " Gwei");
 
         OkHttpClient httpClient = new OkHttpClient();
         Request request = new Request.Builder().url("https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=EUR").build();
@@ -54,13 +54,13 @@ public class GasPrice implements Callable<Void> {
         System.out.println("Ether price: " + priceEur + " EUR");
 
         BigDecimal gasUsed = BigDecimal.valueOf(21000);
-        System.out.println("gas used on regular transaction: " + gasUsed);
+        System.out.println("Gas used on regular transaction: " + gasUsed);
         BigDecimal gasPriceEther = Convert.fromWei(gasPriceWei, Convert.Unit.ETHER);
         BigDecimal costEther = gasUsed.multiply(gasPriceEther);
         BigDecimal costUsd = costEther.multiply(priceUsd);
         BigDecimal costEur = costEther.multiply(priceEur);
-        System.out.println("cost regular transaction: " + costUsd + " USD");
-        System.out.println("cost regular transaction: " + costEur + " EUR");
+        System.out.println("Cost regular transaction: " + costUsd + " USD");
+        System.out.println("Cost regular transaction: " + costEur + " EUR");
         Output.warning("This displayed gas price is the price reported by the node itself.");
         Output.warning("This is not necessarily the sharpest price possible on the network.");
         return null;

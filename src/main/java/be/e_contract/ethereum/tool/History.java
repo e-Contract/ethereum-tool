@@ -43,7 +43,7 @@ public class History implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
-        System.out.println("scanning from block " + blockNumber + " down to block " + blockNumber.subtract(BigInteger.valueOf(this.n)) + " ...");
+        System.out.println("Scanning from block " + blockNumber + " down to block " + blockNumber.subtract(BigInteger.valueOf(this.n)) + " ...");
         // cannot use transaction count here as we would then miss incoming transactions
         // also cannot use "historical" balance has we might receive "missing trie node" errors
         this.address = this.address.toLowerCase();
@@ -54,14 +54,14 @@ public class History implements Callable<Void> {
                 Transaction transaction = transactionObject.get();
                 if (this.address.equals(transaction.getFrom())
                         || this.address.equals(transaction.getTo())) {
-                    Output.printlnBold("transaction hash: " + transaction.getHash());
+                    Output.printlnBold("Transaction hash: " + transaction.getHash());
                     Output.println(10, "From: " + transaction.getFrom());
                     Output.println(10, "To: " + transaction.getTo());
                     Output.println(10, "Value: " + Convert.fromWei(new BigDecimal(transaction.getValue()), Convert.Unit.ETHER) + " ether");
                     Output.println(10, "Block number: " + blockNumber);
                     BigInteger timestamp = block.getTimestamp();
                     Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
-                    Output.println(10, "transaction block timestamp: " + timestampDate);
+                    Output.println(10, "Transaction block timestamp: " + timestampDate);
                 }
             }
             this.n--;

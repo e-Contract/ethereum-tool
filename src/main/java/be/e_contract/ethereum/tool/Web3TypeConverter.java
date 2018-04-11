@@ -70,7 +70,7 @@ public class Web3TypeConverter implements CommandLine.ITypeConverter<Web3j> {
             DateTime timestampDateTime = new DateTime(timestampDate);
             DateTime now = new DateTime();
             if (timestampDateTime.plusMinutes(1).isBefore(now)) {
-                Output.warning("latest block is more than 1 minute old.");
+                Output.warning("Latest block is more than 1 minute old.");
                 Output.warning("Node might be out-of-sync.");
                 Output.warning("Results might be inaccurate.");
             }

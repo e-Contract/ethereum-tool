@@ -49,11 +49,11 @@ public class CreateKey implements Callable<Void> {
         }
         if (this.keyDirectory.exists()) {
             if (!this.keyDirectory.isDirectory()) {
-                Output.error("destination not a directory");
+                Output.error("Destination not a directory");
                 return null;
             }
         } else if (!this.keyDirectory.mkdirs()) {
-            Output.error("could not create destination directory");
+            Output.error("Could not create destination directory");
             return null;
         } else {
             Set<PosixFilePermission> permissions = new HashSet<>();
@@ -63,11 +63,11 @@ public class CreateKey implements Callable<Void> {
             Files.setPosixFilePermissions(this.keyDirectory.toPath(), permissions);
         }
         String keyfile = WalletUtils.generateNewWalletFile(new String(password), this.keyDirectory, true);
-        System.out.println("key file: " + keyfile);
+        System.out.println("Key file: " + keyfile);
         File keyFile = new File(this.keyDirectory, keyfile);
         Credentials credentials = WalletUtils.loadCredentials(new String(password), keyFile);
         String address = credentials.getAddress();
-        System.out.println("address: " + address);
+        System.out.println("Address: " + address);
         if (null != this.publicDirectory) {
             TransactionTemplateGenerator transactionTemplateGenerator = new TransactionTemplateGenerator(this.publicDirectory);
             transactionTemplateGenerator.generateTemplate(address);

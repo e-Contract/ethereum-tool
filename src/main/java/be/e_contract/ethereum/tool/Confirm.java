@@ -68,11 +68,11 @@ public class Confirm implements Callable<Void> {
         } else {
             _transactionHash = this.transactionHash.toLowerCase();
         }
-        System.out.println("transaction hash: " + _transactionHash);
+        System.out.println("Transaction hash: " + _transactionHash);
         EthGetTransactionReceipt getTransactionReceipt = this.web3.ethGetTransactionReceipt(_transactionHash).send();
         Optional<TransactionReceipt> transactionReceiptOptional = getTransactionReceipt.getTransactionReceipt();
         if (!transactionReceiptOptional.isPresent()) {
-            System.out.println("transaction receipt not available");
+            System.out.println("Transaction receipt not available");
             EthBlock pendingEthBlock = this.web3.ethGetBlockByNumber(DefaultBlockParameterName.PENDING, true).send();
             EthBlock.Block pendingBlock = pendingEthBlock.getBlock();
             boolean pendingTransaction = false;
@@ -85,10 +85,10 @@ public class Confirm implements Callable<Void> {
                 }
             }
             if (pendingTransaction) {
-                System.out.println("transaction is pending");
-                System.out.println("number of pending transactions: " + pendingBlock.getTransactions().size());
+                System.out.println("Transaction is pending");
+                System.out.println("Number of pending transactions: " + pendingBlock.getTransactions().size());
             } else {
-                Output.warning("transaction is not pending");
+                Output.warning("Transaction is not pending");
             }
             return null;
         }
@@ -100,38 +100,38 @@ public class Confirm implements Callable<Void> {
         System.out.println("From: " + transactionReceipt.getFrom());
         System.out.println("To: " + transactionReceipt.getTo());
         BigInteger transactionBlockNumber = transactionReceipt.getBlockNumber();
-        System.out.println("transaction block number: " + transactionBlockNumber);
+        System.out.println("Transaction block number: " + transactionBlockNumber);
         BigDecimal gasUsed = new BigDecimal(transactionReceipt.getGasUsed());
-        System.out.println("gas used: " + gasUsed + " wei");
+        System.out.println("Gas used: " + gasUsed + " wei");
         EthBlock ethBlock = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(transactionBlockNumber), false).send();
         EthBlock.Block block = ethBlock.getBlock();
         BigInteger timestamp = block.getTimestamp();
         Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
-        System.out.println("transaction block timestamp: " + timestampDate);
+        System.out.println("Transaction block timestamp: " + timestampDate);
         BigInteger latestBlockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
-        System.out.println("latest block number: " + latestBlockNumber);
+        System.out.println("Latest block number: " + latestBlockNumber);
         // add one, since the transaction block also serves as confirmation
         BigInteger blocksOnTop = latestBlockNumber.subtract(transactionBlockNumber).add(BigInteger.ONE);
-        System.out.println("number of confirming blocks: " + blocksOnTop);
+        System.out.println("Number of confirming blocks: " + blocksOnTop);
         EthTransaction ethTransaction = this.web3.ethGetTransactionByHash(_transactionHash).send();
         Transaction transaction = ethTransaction.getTransaction().get();
         BigInteger nonce = transaction.getNonce();
-        System.out.println("nonce: " + nonce);
+        System.out.println("Nonce: " + nonce);
         BigDecimal valueWei = new BigDecimal(transaction.getValue());
         BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
-        System.out.println("value: " + valueEther + " ether");
+        System.out.println("Value: " + valueEther + " ether");
         BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
-        System.out.println("gas price: " + gasPriceGwei + " gwei");
+        System.out.println("Gas price: " + gasPriceGwei + " gwei");
         BigDecimal transactionCostWei = gasUsed.multiply(gasPriceWei);
         BigDecimal transactionCostEther = Convert.fromWei(transactionCostWei, Convert.Unit.ETHER);
-        System.out.println("transaction cost: " + transactionCostEther + " ether");
+        System.out.println("Transaction cost: " + transactionCostEther + " ether");
         BigInteger fromBalance = this.web3.ethGetBalance(transactionReceipt.getFrom(), DefaultBlockParameterName.LATEST).send().getBalance();
         BigDecimal fromBalanceEther = Convert.fromWei(new BigDecimal(fromBalance), Convert.Unit.ETHER);
-        System.out.println("balance from address: " + fromBalanceEther + " ether");
+        System.out.println("Balance from address: " + fromBalanceEther + " ether");
         BigInteger toBalance = this.web3.ethGetBalance(transactionReceipt.getTo(), DefaultBlockParameterName.LATEST).send().getBalance();
         BigDecimal toBalanceEther = Convert.fromWei(new BigDecimal(toBalance), Convert.Unit.ETHER);
-        System.out.println("balance to address: " + toBalanceEther + " ether");
+        System.out.println("Balance to address: " + toBalanceEther + " ether");
         return null;
     }
 }

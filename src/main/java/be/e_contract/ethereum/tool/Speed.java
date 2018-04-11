@@ -97,16 +97,16 @@ public class Speed implements Callable<Void> {
             try {
                 nodeGasPrice = this.web3.ethGasPrice().send().getGasPrice();
             } catch (IOException ex) {
-                Output.error("error: " + ex.getMessage());
+                Output.error("Error: " + ex.getMessage());
                 return;
             }
             AnsiConsole.out.print(Ansi.ansi().reset().eraseScreen().cursor(0, 0));
             int count = 40;
-            System.out.print("gas price (gwei)");
+            System.out.print("Gas price (gwei)");
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
-            System.out.print("average time (sec)");
+            System.out.print("Average time (sec)");
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
-            System.out.println("tx count");
+            System.out.println("Tx count");
             List<Map.Entry<BigInteger, Timing>> gasPricesList = new ArrayList<>(gasPrices.entrySet());
             // sort on gas price
             gasPricesList.sort((o1, o2) -> o1.getKey().compareTo(o2.getKey()));

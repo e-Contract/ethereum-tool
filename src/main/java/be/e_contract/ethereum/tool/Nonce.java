@@ -35,7 +35,8 @@ public class Nonce implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         BigInteger transactionCount = this.web3.ethGetTransactionCount(this.address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
-        System.out.println("transaction count: " + transactionCount);
+        System.out.println("Transaction count: " + transactionCount);
+        Output.warning("This does not include pending transactions nor transactions in the client node pool.");
         return null;
     }
 }

@@ -40,7 +40,7 @@ public class Trace implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         this.address = this.address.toLowerCase(); // fun fun fun.. capitals
-        System.out.println("address: " + this.address);
+        System.out.println("Address: " + this.address);
         this.web3.blockObservable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
             BigInteger blockNumber = block.getNumber();
@@ -49,7 +49,7 @@ public class Trace implements Callable<Void> {
                 balance = this.web3.ethGetBalance(this.address, DefaultBlockParameter.valueOf(blockNumber)).send().getBalance();
                 // this can go wrong apparently
                 BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
-                Output.printlnBold("block: " + block.getNumber() + " balance: " + balanceEther + " ether");
+                Output.printlnBold("Block: " + block.getNumber() + " balance: " + balanceEther + " ether");
             } catch (IOException ex) {
                 balance = null;
             }
@@ -57,7 +57,7 @@ public class Trace implements Callable<Void> {
                 EthBlock.TransactionObject transactionObject = transactionResult.get();
                 Transaction transaction = transactionObject.get();
                 if (this.address.equals(transaction.getTo()) || this.address.equals(transaction.getFrom())) {
-                    Output.println(10, "transaction hash: " + transaction.getHash());
+                    Output.println(10, "Transaction hash: " + transaction.getHash());
                     Output.println(20, "From: " + transaction.getFrom());
                     Output.println(20, "To: " + transaction.getTo());
                     if ("0x".equals(transaction.getInput())) {

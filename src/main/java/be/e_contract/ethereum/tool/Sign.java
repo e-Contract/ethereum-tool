@@ -51,18 +51,18 @@ public class Sign implements Callable<Void> {
     public Void call() throws Exception {
         Console console = System.console();
         if (this.outFile.exists()) {
-            System.out.println("existing output file: " + this.outFile.getName());
+            System.out.println("Existing output file: " + this.outFile.getName());
             boolean confirmation = askConfirmation(console, "Overwrite output file? (y/n)");
             if (!confirmation) {
                 return null;
             }
         }
         if (!this.templateFile.exists()) {
-            Output.error("template file does not exist");
+            Output.error("Template file does not exist");
             return null;
         }
         if (!this.keyFile.exists()) {
-            Output.error("non existing key file");
+            Output.error("Non existing key file");
             return null;
         }
         Gson gson = new Gson();
@@ -70,12 +70,12 @@ public class Sign implements Callable<Void> {
         if (null != transactionTemplate.description) {
             System.out.println("Description: " + transactionTemplate.description);
         }
-        System.out.println("to: " + transactionTemplate.to);
-        System.out.println("value: " + transactionTemplate.value + " ether");
-        System.out.println("gas price: " + transactionTemplate.gasPrice + " gwei");
-        System.out.println("nonce: " + transactionTemplate.nonce);
+        System.out.println("To: " + transactionTemplate.to);
+        System.out.println("Value: " + transactionTemplate.value + " ether");
+        System.out.println("Gas price: " + transactionTemplate.gasPrice + " gwei");
+        System.out.println("Nonce: " + transactionTemplate.nonce);
         if (!WalletUtils.isValidAddress(transactionTemplate.to)) {
-            Output.error("invalid address: " + transactionTemplate.to);
+            Output.error("Invalid address: " + transactionTemplate.to);
             return null;
         }
         boolean confirmation = askConfirmation(console, "Sign transaction? (y/n)");
@@ -87,14 +87,14 @@ public class Sign implements Callable<Void> {
         try {
             credentials = WalletUtils.loadCredentials(new String(password), this.keyFile);
         } catch (CipherException ex) {
-            Output.error("incorrect passphrase");
+            Output.error("Incorrect passphrase");
             return null;
         }
         String address = credentials.getAddress();
         System.out.println("From address: " + credentials.getAddress());
         if (transactionTemplate.from != null) {
             if (!transactionTemplate.from.equals(address)) {
-                Output.error("from address mismatch");
+                Output.error("From address mismatch");
                 return null;
             }
         }
@@ -119,7 +119,7 @@ public class Sign implements Callable<Void> {
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
         }
         String transactionHash = Numeric.toHexString(HashUtil.sha3(signedTransaction));
-        System.out.println("transaction hash: " + transactionHash);
+        System.out.println("Transaction hash: " + transactionHash);
         String hexValue = Numeric.toHexString(signedTransaction);
         FileUtils.writeStringToFile(this.outFile, hexValue, "UTF-8");
         return null;

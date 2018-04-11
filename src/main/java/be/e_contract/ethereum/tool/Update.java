@@ -35,7 +35,7 @@ public class Update implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (!this.keyFile.exists()) {
-            Output.error("non existing key file");
+            Output.error("Non existing key file");
             return null;
         }
         Console console = System.console();
@@ -44,7 +44,7 @@ public class Update implements Callable<Void> {
         try {
             credentials = WalletUtils.loadCredentials(new String(currentPassword), this.keyFile);
         } catch (CipherException ex) {
-            Output.error("incorrect passphrase");
+            Output.error("Incorrect passphrase");
             return null;
         }
         
@@ -56,7 +56,7 @@ public class Update implements Callable<Void> {
         }
         
         String newKeyfile = WalletUtils.generateWalletFile(new String(password), credentials.getEcKeyPair(), this.keyFile.getParentFile(), true);
-        System.out.println("new key file: " + newKeyfile);
+        System.out.println("New key file: " + newKeyfile);
         
         Output.warning("Old key file: " + this.keyFile.getAbsolutePath());
         Output.warning("Old key file you have to remove yourself.");
