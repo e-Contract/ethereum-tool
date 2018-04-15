@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
 import org.ethereum.core.Transaction;
 import org.ethereum.crypto.HashUtil;
+import org.web3j.crypto.Keys;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 import picocli.CommandLine;
@@ -50,6 +51,8 @@ public class Inspect implements Callable<Void> {
         String to = Numeric.toHexString(transaction.getReceiveAddress());
         System.out.println("From: " + from);
         System.out.println("To: " + to);
+        String checksumTo = Keys.toChecksumAddress(to);
+        System.out.println("To (checksum): " + checksumTo);
         Integer chainId = transaction.getChainId();
         if (null != chainId) {
             System.out.println("Chain id: " + chainId);

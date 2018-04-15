@@ -5,7 +5,7 @@ Command line tool for offline template-based transaction signing.
 
 If you like this tool, please consider a donation at:
 ```
-0x0c56073db91c2ba57ff362301eb32262bbee6147
+0x0c56073db91c2Ba57FF362301eb32262BBeE6147
 ```
 
 
@@ -14,9 +14,9 @@ If you like this tool, please consider a donation at:
 Download the latest ZIP from:
 https://www.e-contract.be/maven2/be/e-contract/ethereum-tool/
 
-Install via:
+Install (Mac OS X or Linux) via:
 ```
-sudo unzip -o ethereum-tool-1.x.y.zip -d /usr/local/
+sudo unzip -o ethereum-tool-1.0.0.zip -d /usr/local/
 ```
 
 

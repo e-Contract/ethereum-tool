@@ -32,7 +32,7 @@ public class ENS implements Callable<Void> {
     private String name;
 
     @CommandLine.Option(names = {"-a", "--address"}, description = "the ethereum address")
-    private String address;
+    private Address address;
 
     @Override
     public Void call() throws Exception {
@@ -43,7 +43,7 @@ public class ENS implements Callable<Void> {
         }
         EnsResolver ensResolver = new EnsResolver(this.web3);
         if (null != this.address) {
-            String name = ensResolver.reverseResolve(this.address);
+            String name = ensResolver.reverseResolve(this.address.getAddress());
             System.out.println("Name: " + name);
             return null;
         }

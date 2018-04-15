@@ -60,6 +60,9 @@ public class Miners implements Callable<Void> {
             }
             count--;
             blockNumber = blockNumber.subtract(BigInteger.ONE);
+            if (blockNumber.signum() == -1) {
+                break;
+            }
         }
         List<Miner> minerList = new ArrayList<>(miners.values());
         minerList.sort((o1, o2) -> Integer.compare(o2.getBlocks(), o1.getBlocks()));
@@ -73,7 +76,7 @@ public class Miners implements Callable<Void> {
         for (Miner miner : minerList) {
             System.out.print(miner.blocks);
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
-            System.out.print((double) miner.blocks / this.n * 100);
+            System.out.print((double) miner.blocks / (this.n - count) * 100);
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
             System.out.print(miner.address);
             AnsiConsole.out.print(Ansi.ansi().cursorToColumn(90));

@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import picocli.CommandLine;
 
@@ -68,6 +69,8 @@ public class CreateKey implements Callable<Void> {
         Credentials credentials = WalletUtils.loadCredentials(new String(password), keyFile);
         String address = credentials.getAddress();
         System.out.println("Address: " + address);
+        String checksumAddress = Keys.toChecksumAddress(address);
+        System.out.println("Address (checksum): " + checksumAddress);
         if (null != this.publicDirectory) {
             TransactionTemplateGenerator transactionTemplateGenerator = new TransactionTemplateGenerator(this.publicDirectory);
             transactionTemplateGenerator.generateTemplate(address);

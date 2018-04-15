@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.utils.Convert;
@@ -37,13 +38,16 @@ public class Balance implements Callable<Void> {
     private Web3j web3;
 
     @CommandLine.Option(names = {"-a", "--address"}, required = true, description = "the key address")
-    private String address;
+    private Address address;
 
     @Override
     public Void call() throws Exception {
-        BigInteger transactionCount = this.web3.ethGetTransactionCount(this.address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
+        System.out.println("Address: " + this.address.getAddress());
+        String checksumAddress = Keys.toChecksumAddress(this.address.getAddress());
+        System.out.println("Address (checksum): " + checksumAddress);
+        BigInteger transactionCount = this.web3.ethGetTransactionCount(this.address.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
         System.out.println("Transaction count: " + transactionCount);
-        BigInteger balance = this.web3.ethGetBalance(this.address, DefaultBlockParameterName.LATEST).send().getBalance();
+        BigInteger balance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameterName.LATEST).send().getBalance();
         BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
         System.out.println("Balance: " + balanceEther + " ether");
 

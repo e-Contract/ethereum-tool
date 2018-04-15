@@ -52,14 +52,14 @@ public class Confirm implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (null == this.transactionFile && null == this.transactionHash) {
-            Output.error("provide transaction file or transaction hash");
+            Output.error("Provide transaction file or transaction hash");
             picocli.CommandLine.usage(this, System.out);
             return null;
         }
         String _transactionHash;
         if (null != transactionFile) {
             if (!this.transactionFile.exists()) {
-                Output.error("transaction file not found");
+                Output.error("Transaction file not found");
                 return null;
             }
             String transactionHex = FileUtils.readFileToString(this.transactionFile, "UTF-8");

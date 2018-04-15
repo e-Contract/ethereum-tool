@@ -35,18 +35,17 @@ public class Trace implements Callable<Void> {
     private Web3j web3;
 
     @CommandLine.Option(names = {"-a", "--address"}, required = true, description = "the key address")
-    private String address;
+    private Address address;
 
     @Override
     public Void call() throws Exception {
-        this.address = this.address.toLowerCase(); // fun fun fun.. capitals
-        System.out.println("Address: " + this.address);
+        System.out.println("Address: " + this.address.getAddress());
         this.web3.blockObservable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
             BigInteger blockNumber = block.getNumber();
             BigInteger balance;
             try {
-                balance = this.web3.ethGetBalance(this.address, DefaultBlockParameter.valueOf(blockNumber)).send().getBalance();
+                balance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(blockNumber)).send().getBalance();
                 // this can go wrong apparently
                 BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
                 Output.printlnBold("Block: " + block.getNumber() + " balance: " + balanceEther + " ether");
@@ -56,7 +55,7 @@ public class Trace implements Callable<Void> {
             for (EthBlock.TransactionResult<EthBlock.TransactionObject> transactionResult : block.getTransactions()) {
                 EthBlock.TransactionObject transactionObject = transactionResult.get();
                 Transaction transaction = transactionObject.get();
-                if (this.address.equals(transaction.getTo()) || this.address.equals(transaction.getFrom())) {
+                if (this.address.getAddress().equals(transaction.getTo()) || this.address.getAddress().equals(transaction.getFrom())) {
                     Output.println(10, "Transaction hash: " + transaction.getHash());
                     Output.println(20, "From: " + transaction.getFrom());
                     Output.println(20, "To: " + transaction.getTo());

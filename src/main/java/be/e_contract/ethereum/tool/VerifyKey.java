@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.concurrent.Callable;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import picocli.CommandLine;
 
@@ -51,6 +52,8 @@ public class VerifyKey implements Callable<Void> {
         }
         String address = credentials.getAddress();
         System.out.println("Address: " + address);
+        String checksumAddress = Keys.toChecksumAddress(address);
+        System.out.println("Address (checksum): " + checksumAddress);
         if (null != this.publicDirectory) {
             TransactionTemplateGenerator transactionTemplateGenerator = new TransactionTemplateGenerator(this.publicDirectory);
             transactionTemplateGenerator.generateTemplate(address);

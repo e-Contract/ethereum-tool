@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.ethereum.crypto.HashUtil;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
@@ -78,6 +79,12 @@ public class Sign implements Callable<Void> {
             Output.error("Invalid address: " + transactionTemplate.to);
             return null;
         }
+        if (!transactionTemplate.to.toLowerCase().equals(transactionTemplate.to)) {
+            if (!Keys.toChecksumAddress(transactionTemplate.to).equals(transactionTemplate.to)) {
+                Output.error("Address checksum error: " + transactionTemplate.to);
+                return null;
+            }
+        }
         boolean confirmation = askConfirmation(console, "Sign transaction? (y/n)");
         if (!confirmation) {
             return null;
@@ -93,7 +100,8 @@ public class Sign implements Callable<Void> {
         String address = credentials.getAddress();
         System.out.println("From address: " + credentials.getAddress());
         if (transactionTemplate.from != null) {
-            if (!transactionTemplate.from.equals(address)) {
+            String from = transactionTemplate.from.toLowerCase();
+            if (!from.equals(address)) {
                 Output.error("From address mismatch");
                 return null;
             }

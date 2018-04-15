@@ -35,7 +35,7 @@ public class History implements Callable<Void> {
     private Web3j web3;
 
     @CommandLine.Option(names = {"-a", "--address"}, required = true, description = "the key address")
-    private String address;
+    private Address address;
 
     @CommandLine.Option(names = {"-n", "--blocks"}, required = true, description = "number of blocks from latest to scan")
     private int n;
@@ -46,14 +46,13 @@ public class History implements Callable<Void> {
         System.out.println("Scanning from block " + blockNumber + " down to block " + blockNumber.subtract(BigInteger.valueOf(this.n)) + " ...");
         // cannot use transaction count here as we would then miss incoming transactions
         // also cannot use "historical" balance has we might receive "missing trie node" errors
-        this.address = this.address.toLowerCase();
         while (this.n > 0) {
             EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
             for (EthBlock.TransactionResult transactionResult : block.getTransactions()) {
                 EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
                 Transaction transaction = transactionObject.get();
-                if (this.address.equals(transaction.getFrom())
-                        || this.address.equals(transaction.getTo())) {
+                if (this.address.getAddress().equals(transaction.getFrom())
+                        || this.address.getAddress().equals(transaction.getTo())) {
                     Output.printlnBold("Transaction hash: " + transaction.getHash());
                     Output.println(10, "From: " + transaction.getFrom());
                     Output.println(10, "To: " + transaction.getTo());
@@ -66,6 +65,9 @@ public class History implements Callable<Void> {
             }
             this.n--;
             blockNumber = blockNumber.subtract(BigInteger.ONE);
+            if (blockNumber.signum() == -1) {
+                return null;
+            }
         }
         return null;
     }

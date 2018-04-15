@@ -30,11 +30,11 @@ public class Nonce implements Callable<Void> {
     private Web3j web3;
 
     @CommandLine.Option(names = {"-a", "--address"}, required = true, description = "the key address")
-    private String address;
+    private Address address;
 
     @Override
     public Void call() throws Exception {
-        BigInteger transactionCount = this.web3.ethGetTransactionCount(this.address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
+        BigInteger transactionCount = this.web3.ethGetTransactionCount(this.address.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
         System.out.println("Transaction count: " + transactionCount);
         Output.warning("This does not include pending transactions nor transactions in the client node pool.");
         return null;
