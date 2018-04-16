@@ -122,6 +122,10 @@ public class Sign implements Callable<Void> {
         if (null != transactionTemplate.chainId) {
             System.out.println("Chain Id: " + transactionTemplate.chainId);
             // https://github.com/web3j/web3j/issues/234
+            if (transactionTemplate.chainId > 46) {
+                Output.error("web3j cannot sign with chainId > 46");
+                return null;
+            }
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, transactionTemplate.chainId, credentials);
         } else {
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
