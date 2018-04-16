@@ -166,7 +166,7 @@
             <dependency>
                 <groupId>org.web3j</groupId>
                 <artifactId>core</artifactId>
-                <version>3.3.2-SNAPSHOT</version>
+                <version>3.3.2-econtract-1</version>
             </dependency>
             <dependency>
                 <!-- else we cannot read the key files anymore -->
@@ -261,16 +261,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ethereum</groupId>
-            <artifactId>ethereumj-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>

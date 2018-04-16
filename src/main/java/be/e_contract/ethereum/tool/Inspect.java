@@ -22,11 +22,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
-import org.ethereum.core.Transaction;
-import org.ethereum.crypto.HashUtil;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.SignedRawTransaction;
+import org.web3j.crypto.TransactionDecoder;
 import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "inspect", description = "inspect a transaction", separator = " ")
@@ -42,13 +43,16 @@ public class Inspect implements Callable<Void> {
             return null;
         }
         String hexData = FileUtils.readFileToString(this.transactionFile, "UTF-8");
-        byte[] rawData = Numeric.hexStringToByteArray(hexData);
-        String transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
+        String transactionHash = Hash.sha3(hexData);
         System.out.println("Transaction hash: " + transactionHash);
-        Transaction transaction = new Transaction(rawData);
-        transaction.verify();
-        String from = Numeric.toHexString(transaction.getSender());
-        String to = Numeric.toHexString(transaction.getReceiveAddress());
+        RawTransaction rawTransaction = TransactionDecoder.decode(hexData);
+        if (!(rawTransaction instanceof SignedRawTransaction)) {
+            Output.error("Transaction is not signed.");
+            return null;
+        }
+        SignedRawTransaction transaction = (SignedRawTransaction) rawTransaction;
+        String from = transaction.getFrom();
+        String to = transaction.getTo();
         System.out.println("From: " + from);
         System.out.println("To: " + to);
         String checksumTo = Keys.toChecksumAddress(to);
@@ -57,14 +61,14 @@ public class Inspect implements Callable<Void> {
         if (null != chainId) {
             System.out.println("Chain id: " + chainId);
         }
-        BigInteger nonce = new BigInteger(transaction.getNonce());
+        BigInteger nonce = transaction.getNonce();
         System.out.println("Nonce: " + nonce);
-        BigDecimal valueWei = new BigDecimal(new BigInteger(1, transaction.getValue()));
+        BigDecimal valueWei = new BigDecimal(transaction.getValue());
         BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
         System.out.println("Value: " + valueEther + " ether");
-        BigDecimal gasLimitWei = new BigDecimal(new BigInteger(1, transaction.getGasLimit()));
+        BigDecimal gasLimitWei = new BigDecimal(transaction.getGasLimit());
         System.out.println("Gas limit: " + gasLimitWei + " wei");
-        BigDecimal gasPriceWei = new BigDecimal(new BigInteger(1, transaction.getGasPrice()));
+        BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
         System.out.println("Gas price: " + gasPriceGwei + " gwei");
         return null;

@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
-import org.ethereum.crypto.HashUtil;
+import org.web3j.crypto.Hash;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -63,8 +63,7 @@ public class Confirm implements Callable<Void> {
                 return null;
             }
             String transactionHex = FileUtils.readFileToString(this.transactionFile, "UTF-8");
-            byte[] rawData = Numeric.hexStringToByteArray(transactionHex);
-            _transactionHash = Numeric.toHexString(HashUtil.sha3(rawData));
+            _transactionHash = Hash.sha3(transactionHex);
         } else {
             _transactionHash = this.transactionHash.toLowerCase();
         }

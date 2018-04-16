@@ -25,9 +25,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
-import org.ethereum.crypto.HashUtil;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -130,9 +130,10 @@ public class Sign implements Callable<Void> {
         } else {
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
         }
-        String transactionHash = Numeric.toHexString(HashUtil.sha3(signedTransaction));
-        System.out.println("Transaction hash: " + transactionHash);
         String hexValue = Numeric.toHexString(signedTransaction);
+        String transactionHash = Hash.sha3(hexValue);
+        System.out.println("Transaction hash: " + transactionHash);
+
         FileUtils.writeStringToFile(this.outFile, hexValue, "UTF-8");
         return null;
     }
