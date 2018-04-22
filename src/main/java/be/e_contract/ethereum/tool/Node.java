@@ -30,9 +30,6 @@ import picocli.CommandLine;
 @CommandLine.Command(name = "node", description = "display node information", separator = " ")
 public class Node implements Callable<Void> {
 
-    private static final int CHAIN_ID_INC = 35;
-    private static final int LOWER_REAL_V = 27;
-
     @CommandLine.Option(names = {"-l", "--location"}, required = true, description = "the location of the client node")
     private Web3j web3;
 
@@ -70,11 +67,7 @@ public class Node implements Callable<Void> {
                 EthBlock.TransactionResult transactionResult = transactions.get(0);
                 EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
                 Transaction transaction = transactionObject.get();
-                int v = transaction.getV();
-                if (v == LOWER_REAL_V || v == (LOWER_REAL_V + 1)) {
-                    return null;
-                }
-                Integer chainId = (v - CHAIN_ID_INC) / 2;
+                Integer chainId = transaction.getChainId();
                 return chainId;
             }
             blockNumber = blockNumber.subtract(BigInteger.ONE);
