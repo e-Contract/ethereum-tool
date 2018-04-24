@@ -14,7 +14,7 @@ If you like this tool, please consider a donation at:
 Download the latest ZIP from:
 https://www.e-contract.be/maven2/be/e-contract/ethereum-tool/
 
-Install (Mac OS X or Linux) via:
+Install (Mac OS X, Linux, or FreeBSD) via:
 ```
 sudo unzip -o ethereum-tool-1.0.0.zip -d /usr/local/
 ```
