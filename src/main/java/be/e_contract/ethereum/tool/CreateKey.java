@@ -57,11 +57,14 @@ public class CreateKey implements Callable<Void> {
             Output.error("Could not create destination directory");
             return null;
         } else {
-            Set<PosixFilePermission> permissions = new HashSet<>();
-            permissions.add(PosixFilePermission.OWNER_READ);
-            permissions.add(PosixFilePermission.OWNER_WRITE);
-            permissions.add(PosixFilePermission.OWNER_EXECUTE);
-            Files.setPosixFilePermissions(this.keyDirectory.toPath(), permissions);
+            String osName = System.getProperty("os.name").toLowerCase();
+            if (!osName.contains("win")) {
+                Set<PosixFilePermission> permissions = new HashSet<>();
+                permissions.add(PosixFilePermission.OWNER_READ);
+                permissions.add(PosixFilePermission.OWNER_WRITE);
+                permissions.add(PosixFilePermission.OWNER_EXECUTE);
+                Files.setPosixFilePermissions(this.keyDirectory.toPath(), permissions);
+            }
         }
         String keyfile = WalletUtils.generateNewWalletFile(new String(password), this.keyDirectory, true);
         System.out.println("Key file: " + keyfile);

@@ -30,5 +30,11 @@
             <filtered>true</filtered>
             <fileMode>0555</fileMode>
         </file>
+        <file>
+            <source>src/main/assembly/ethereum-tool.bat</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>ethereum-tool</destName>
+            <filtered>true</filtered>
+        </file>
     </files>
 </assembly>
