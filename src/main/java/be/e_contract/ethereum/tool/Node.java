@@ -35,6 +35,10 @@ public class Node implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        String clientVersion = this.web3.web3ClientVersion().send().getWeb3ClientVersion();
+        if (null != clientVersion) {
+            System.out.println("Client version: " + clientVersion);
+        }
         boolean mining = this.web3.ethMining().send().isMining();
         System.out.println("Mining: " + mining);
         if (mining) {
