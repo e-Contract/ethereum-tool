@@ -55,7 +55,7 @@ public class Node implements Callable<Void> {
         System.out.println("Network version: " + version);
         BigInteger peerCount = this.web3.netPeerCount().send().getQuantity();
         System.out.println("Peer count: " + peerCount);
-        Integer chainId = getChainId();
+        Long chainId = getChainId();
         if (null != chainId) {
             System.out.println("Chain id: " + chainId);
         }
@@ -64,7 +64,7 @@ public class Node implements Callable<Void> {
         return null;
     }
 
-    private Integer getChainId() throws IOException {
+    private Long getChainId() throws IOException {
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         while (!blockNumber.equals(BigInteger.ZERO)) {
             EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
@@ -73,7 +73,7 @@ public class Node implements Callable<Void> {
                 EthBlock.TransactionResult transactionResult = transactions.get(0);
                 EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
                 Transaction transaction = transactionObject.get();
-                Integer chainId = transaction.getChainId();
+                Long chainId = transaction.getChainId();
                 return chainId;
             }
             blockNumber = blockNumber.subtract(BigInteger.ONE);
