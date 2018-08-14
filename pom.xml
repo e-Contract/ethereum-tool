@@ -4,7 +4,7 @@
     <name>Ethereum Tool</name>
     <groupId>be.e-contract</groupId>
     <artifactId>ethereum-tool</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <inceptionYear>2018</inceptionYear>
     <organization>
         <name>e-Contract.be BVBA</name>

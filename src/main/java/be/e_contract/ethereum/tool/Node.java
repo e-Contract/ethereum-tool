@@ -59,6 +59,8 @@ public class Node implements Callable<Void> {
         if (null != chainId) {
             System.out.println("Chain id: " + chainId);
         }
+        BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
+        System.out.println("Latest block: " + blockNumber);
         return null;
     }
 
