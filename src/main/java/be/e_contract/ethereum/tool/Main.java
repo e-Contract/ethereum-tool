@@ -52,7 +52,7 @@ import org.web3j.protocol.Web3j;
             Trace.class
         },
         versionProvider = VersionProvider.class,
-        footer = "Copyright (C) 2018 Frank Cornelis\nDonations: " + Version.DONATION,
+        footer = "Copyright (C) 2018-2019 Frank Cornelis\nDonations: " + Version.DONATION,
         separator = " "
 )
 public class Main implements Callable<Void> {
