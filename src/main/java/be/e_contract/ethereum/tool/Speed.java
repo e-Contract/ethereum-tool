@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -49,14 +49,14 @@ public class Speed implements Callable<Void> {
         System.out.println("Takes a while for results getting to get in...");
         Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
         Map<BigInteger, Timing> gasPrices = new HashMap<>();
-        this.web3.pendingTransactionObservable().subscribe(tx -> {
+        this.web3.pendingTransactionFlowable().subscribe(tx -> {
             // we don't know the transaction type (regular or contract) here yet, so we add everything here
             pendingTransactions.put(tx.getHash(), new PendingTransaction(tx.getGasPrice()));
         }, error -> {
             Output.error(error.getMessage());
             error.printStackTrace();
         });
-        this.web3.blockObservable(true).subscribe(ethBlock -> {
+        this.web3.blockFlowable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
             boolean updated = false;
             for (EthBlock.TransactionResult<EthBlock.TransactionObject> transactionResult : block.getTransactions()) {

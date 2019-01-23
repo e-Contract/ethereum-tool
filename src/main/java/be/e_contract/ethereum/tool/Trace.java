@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -40,7 +40,7 @@ public class Trace implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         System.out.println("Address: " + this.address.getAddress());
-        this.web3.blockObservable(true).subscribe(ethBlock -> {
+        this.web3.blockFlowable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
             BigInteger blockNumber = block.getNumber();
             BigInteger balance;
