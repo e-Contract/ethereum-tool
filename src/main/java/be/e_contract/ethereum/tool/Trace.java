@@ -40,6 +40,10 @@ public class Trace implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         System.out.println("Address: " + this.address.getAddress());
+        BigInteger initialBlockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
+        BigInteger initialBalance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(initialBlockNumber)).send().getBalance();
+        BigDecimal initialBalanceEther = Convert.fromWei(new BigDecimal(initialBalance), Convert.Unit.ETHER);
+        Output.printlnBold("Block: " + initialBlockNumber + " balance: " + initialBalanceEther + " ether");
         this.web3.blockFlowable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
             BigInteger blockNumber = block.getNumber();
