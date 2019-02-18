@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -43,14 +43,26 @@ public class ENS implements Callable<Void> {
         }
         EnsResolver ensResolver = new EnsResolver(this.web3);
         if (null != this.address) {
-            String name = ensResolver.reverseResolve(this.address.getAddress());
-            System.out.println("Name: " + name);
+            String resolvedName;
+            try {
+                resolvedName = ensResolver.reverseResolve(this.address.getAddress());
+            } catch (Exception ex) {
+                Output.error("No name for address: " + this.address.getAddress());
+                return null;
+            }
+            System.out.println("Name: " + resolvedName);
             return null;
         }
 
         if (null != this.name) {
-            String address = ensResolver.resolve(this.name);
-            System.out.println("Address: " + address);
+            String resolvedAddress;
+            try {
+                resolvedAddress = ensResolver.resolve(this.name);
+            } catch (Exception ex) {
+                Output.error("No address for name: " + this.name);
+                return null;
+            }
+            System.out.println("Address: " + resolvedAddress);
             return null;
         }
         return null;
