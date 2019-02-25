@@ -17,12 +17,14 @@
  */
 package be.e_contract.ethereum.tool;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "block", description = "inspect a block", separator = " ")
@@ -36,6 +38,9 @@ public class Block implements Callable<Void> {
 
     @CommandLine.Option(names = {"-n", "--number"}, description = "the block number")
     private BigInteger blockNumber;
+
+    @CommandLine.Option(names = {"-t", "--transactions"}, description = "show the transactions")
+    private boolean[] displayTransactions;
 
     @Override
     public Void call() throws Exception {
@@ -56,7 +61,11 @@ public class Block implements Callable<Void> {
 
     private void printBlock(EthBlock.Block block) throws Exception {
         if (null == block) {
-            Output.error("Unknown block number: " + this.blockNumber);
+            if (null != this.blockNumber) {
+                Output.error("Unknown block number: " + this.blockNumber);
+            } else {
+                Output.error("Unknown block hash: " + this.blockHash);
+            }
             return;
         }
         System.out.println("block number: " + block.getNumber());
@@ -65,6 +74,21 @@ public class Block implements Callable<Void> {
         Date blockTimestampDate = new Date(blockTimestamp.multiply(BigInteger.valueOf(1000)).longValue());
         System.out.println("block timestamp: " + blockTimestampDate);
         System.out.println("number of transactions: " + block.getTransactions().size());
+        if (this.displayTransactions != null) {
+            System.out.println("Transactions:");
+            for (EthBlock.TransactionResult transactionResult : block.getTransactions()) {
+                EthBlock.TransactionObject transaction = (EthBlock.TransactionObject) transactionResult.get();
+                Output.println(10, "Transaction hash: " + transaction.getHash());
+                Output.println(20, "From: " + transaction.getFrom());
+                Output.println(20, "To: " + transaction.getTo());
+                if ("0x".equals(transaction.getInput())) {
+                    BigDecimal valueEther = Convert.fromWei(new BigDecimal(transaction.getValue()), Convert.Unit.ETHER);
+                    Output.println(20, "Value: " + valueEther + " ether");
+                } else {
+                    Output.println(20, "Contract transaction: " + transaction.getInput());
+                }
+            }
+        }
         for (String uncle : block.getUncles()) {
             System.out.println("block uncle: " + uncle);
         }
