@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.utils.Convert;
@@ -44,17 +45,33 @@ public class Trace implements Callable<Void> {
         BigInteger initialBalance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(initialBlockNumber)).send().getBalance();
         BigDecimal initialBalanceEther = Convert.fromWei(new BigDecimal(initialBalance), Convert.Unit.ETHER);
         Output.printlnBold("Block: " + initialBlockNumber + " balance: " + initialBalanceEther + " ether");
+        EthBlock pendingEthBlock = this.web3.ethGetBlockByNumber(DefaultBlockParameterName.PENDING, true).send();
+        EthBlock.Block pendingBlock = pendingEthBlock.getBlock();
+        for (EthBlock.TransactionResult transactionResult : pendingBlock.getTransactions()) {
+            EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
+            Transaction transaction = transactionObject.get();
+            if (this.address.getAddress().equals(transaction.getTo()) || this.address.getAddress().equals(transaction.getFrom())) {
+                Output.println(10, "Pending transaction hash: " + transaction.getHash());
+                Output.println(20, "From: " + transaction.getFrom());
+                Output.println(20, "To: " + transaction.getTo());
+                if ("0x".equals(transaction.getInput())) {
+                    BigDecimal valueEther = Convert.fromWei(new BigDecimal(transaction.getValue()), Convert.Unit.ETHER);
+                    Output.println(20, "Value: " + valueEther + " ether");
+                } else {
+                    Output.println(20, "Contract transaction: " + transaction.getInput());
+                }
+            }
+        }
         this.web3.blockFlowable(true).subscribe(ethBlock -> {
             EthBlock.Block block = ethBlock.getBlock();
             BigInteger blockNumber = block.getNumber();
-            BigInteger balance;
             try {
-                balance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(blockNumber)).send().getBalance();
+                BigInteger balance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(blockNumber)).send().getBalance();
                 // this can go wrong apparently
                 BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
                 Output.printlnBold("Block: " + block.getNumber() + " balance: " + balanceEther + " ether");
             } catch (IOException ex) {
-                balance = null;
+                // silence here
             }
             for (EthBlock.TransactionResult<EthBlock.TransactionObject> transactionResult : block.getTransactions()) {
                 EthBlock.TransactionObject transactionObject = transactionResult.get();
