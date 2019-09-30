@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -57,7 +57,7 @@ public class Inspect implements Callable<Void> {
         System.out.println("To: " + to);
         String checksumTo = Keys.toChecksumAddress(to);
         System.out.println("To (checksum): " + checksumTo);
-        Integer chainId = transaction.getChainId();
+        Long chainId = transaction.getChainId();
         if (null != chainId) {
             System.out.println("Chain id: " + chainId);
         }
