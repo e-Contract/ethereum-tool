@@ -176,7 +176,7 @@
             <dependency>
                 <groupId>org.web3j</groupId>
                 <artifactId>core</artifactId>
-                <version>4.5.4</version>
+                <version>4.5.11</version>
             </dependency>
             <dependency>
                 <!-- else we cannot read the key files anymore -->
