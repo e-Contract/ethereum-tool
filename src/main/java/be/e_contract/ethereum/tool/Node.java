@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -17,14 +17,9 @@
  */
 package be.e_contract.ethereum.tool;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.List;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.methods.response.EthBlock;
-import org.web3j.protocol.core.methods.response.Transaction;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "node", description = "display node information", separator = " ")
@@ -55,30 +50,12 @@ public class Node implements Callable<Void> {
         System.out.println("Network version: " + version);
         BigInteger peerCount = this.web3.netPeerCount().send().getQuantity();
         System.out.println("Peer count: " + peerCount);
-        Long chainId = getChainId();
+        BigInteger chainId = this.web3.ethChainId().send().getChainId();
         if (null != chainId) {
             System.out.println("Chain id: " + chainId);
         }
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         System.out.println("Latest block: " + blockNumber);
-        return null;
-    }
-
-    private Long getChainId() throws IOException {
-        BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
-        while (!blockNumber.equals(BigInteger.ZERO)) {
-            EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
-            List<EthBlock.TransactionResult> transactions = block.getTransactions();
-            if (!transactions.isEmpty()) {
-                EthBlock.TransactionResult transactionResult = transactions.get(0);
-                EthBlock.TransactionObject transactionObject = (EthBlock.TransactionObject) transactionResult;
-                Transaction transaction = transactionObject.get();
-                Long chainId = transaction.getChainId();
-                return chainId;
-            }
-            blockNumber = blockNumber.subtract(BigInteger.ONE);
-        }
-        Output.error("Could not determine chain id");
         return null;
     }
 }
