@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2019 e-Contract.be BVBA.
+ * Copyright (C) 2019-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -74,6 +74,8 @@ public class Block implements Callable<Void> {
         Date blockTimestampDate = new Date(blockTimestamp.multiply(BigInteger.valueOf(1000)).longValue());
         System.out.println("block timestamp: " + blockTimestampDate);
         System.out.println("number of transactions: " + block.getTransactions().size());
+        System.out.println("gas limit: " + block.getGasLimit() + " wei");
+        System.out.println("gas used: " + block.getGasUsed() + " wei");
         if (this.displayTransactions != null) {
             System.out.println("Transactions:");
             for (EthBlock.TransactionResult transactionResult : block.getTransactions()) {

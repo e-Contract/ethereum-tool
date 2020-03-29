@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -20,11 +20,14 @@ package be.e_contract.ethereum.tool;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
@@ -41,6 +44,10 @@ public class GasPrice implements Callable<Void> {
         System.out.println("Gas price: " + gasPriceWei + " wei");
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
         System.out.println("Gas price: " + gasPriceGwei + " Gwei");
+
+        BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
+        EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
+        System.out.println("Gas limit: " + block.getGasLimit() + " wei");
 
         OkHttpClient httpClient = new OkHttpClient();
         Request request = new Request.Builder().url("https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=EUR").build();

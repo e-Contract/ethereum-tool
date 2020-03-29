@@ -20,6 +20,8 @@ package be.e_contract.ethereum.tool;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "node", description = "display node information", separator = " ")
@@ -56,6 +58,9 @@ public class Node implements Callable<Void> {
         }
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         System.out.println("Latest block: " + blockNumber);
+        EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
+        System.out.println("Gas used: " + block.getGasUsed() + " wei");
+        System.out.println("Gas limit: " + block.getGasLimit() + " wei");
         return null;
     }
 }
