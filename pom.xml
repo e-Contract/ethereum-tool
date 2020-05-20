@@ -4,7 +4,7 @@
     <name>Ethereum Tool</name>
     <groupId>be.e-contract</groupId>
     <artifactId>ethereum-tool</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7-SNAPSHOT</version>
     <inceptionYear>2018</inceptionYear>
     <organization>
         <name>e-Contract.be BVBA</name>
@@ -163,7 +163,7 @@
     </properties>
     <scm>
         <connection>scm:git:e-contract.be:git/ethereum-tool.git</connection>
-        <tag>ethereum-tool-1.0.6</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <downloadUrl>https://www.e-contract.be/maven2/be/e-contract/ethereum-tool/</downloadUrl>
