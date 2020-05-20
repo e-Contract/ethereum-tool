@@ -16,7 +16,7 @@ https://www.e-contract.be/maven2/be/e-contract/ethereum-tool/
 
 Install (Mac OS X, Linux, or FreeBSD) via:
 ```
-sudo unzip -o ethereum-tool-1.0.5.zip -d /usr/local/
+sudo unzip -o ethereum-tool-1.0.6.zip -d /usr/local/
 ```
 
 
