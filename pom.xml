@@ -78,7 +78,7 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>5.3.1</version>
+                    <version>5.3.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -153,7 +153,7 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>3.3.4</version>
+                <version>3.4.0</version>
             </extension>
         </extensions>
     </build>
@@ -181,7 +181,7 @@
             <dependency>
                 <groupId>org.web3j</groupId>
                 <artifactId>core</artifactId>
-                <version>4.5.17</version>
+                <version>4.5.18</version>
             </dependency>
             <dependency>
                 <!-- else we cannot read the key files anymore -->
@@ -192,7 +192,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.9</version>
+                <version>3.10</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -230,11 +230,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ethereum</groupId>
-                <artifactId>ethereumj-core</artifactId>
-                <version>1.12.0-RELEASE</version>
-            </dependency>
-            <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>4.2.0</version>
@@ -247,7 +242,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.10.5</version>
+                <version>2.10.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

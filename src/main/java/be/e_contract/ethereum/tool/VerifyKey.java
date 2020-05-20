@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -39,6 +39,10 @@ public class VerifyKey implements Callable<Void> {
     public Void call() throws Exception {
         if (!this.keyFile.exists()) {
             Output.error("Non existing key file");
+            return null;
+        }
+        if (!this.keyFile.isFile()) {
+            Output.error("Not a regular file");
             return null;
         }
         Console console = System.console();
