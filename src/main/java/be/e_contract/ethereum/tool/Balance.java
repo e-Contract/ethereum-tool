@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2019 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -41,7 +41,7 @@ public class Balance implements Callable<Void> {
     @CommandLine.Option(names = {"-a", "--address"}, required = true, description = "the key address")
     private Address address;
 
-    @CommandLine.Option(names = {"-n", "--number"}, description = "the block number")
+    @CommandLine.Option(names = {"-n", "--number"}, description = "the optional block number")
     private BigInteger blockNumber;
 
     @Override

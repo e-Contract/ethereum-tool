@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -67,19 +67,19 @@ public class Miners implements Callable<Void> {
         List<Miner> minerList = new ArrayList<>(miners.values());
         minerList.sort((o1, o2) -> Integer.compare(o2.getBlocks(), o1.getBlocks()));
         System.out.print("Number of blocks");
-        AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
+        AnsiConsole.out().print(Ansi.ansi().cursorToColumn(20));
         System.out.print("% of blocks");
-        AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
+        AnsiConsole.out().print(Ansi.ansi().cursorToColumn(40));
         System.out.print("Miner");
-        AnsiConsole.out.print(Ansi.ansi().cursorToColumn(90));
+        AnsiConsole.out().print(Ansi.ansi().cursorToColumn(90));
         System.out.println("Balance (ether)");
         for (Miner miner : minerList) {
             System.out.print(miner.blocks);
-            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
+            AnsiConsole.out().print(Ansi.ansi().cursorToColumn(20));
             System.out.print((double) miner.blocks / (this.n - count) * 100);
-            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
+            AnsiConsole.out().print(Ansi.ansi().cursorToColumn(40));
             System.out.print(miner.address);
-            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(90));
+            AnsiConsole.out().print(Ansi.ansi().cursorToColumn(90));
             BigDecimal balance = new BigDecimal(this.web3.ethGetBalance(miner.address, DefaultBlockParameterName.LATEST).send().getBalance());
             BigDecimal balanceEther = Convert.fromWei(balance, Convert.Unit.ETHER);
             System.out.println(balanceEther);

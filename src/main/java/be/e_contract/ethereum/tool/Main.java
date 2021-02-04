@@ -62,7 +62,7 @@ public class Main implements Callable<Void> {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                AnsiConsole.out.print(Ansi.ansi().reset());
+                AnsiConsole.out().print(Ansi.ansi().reset());
                 System.out.println();
             }
 
@@ -70,7 +70,7 @@ public class Main implements Callable<Void> {
         picocli.CommandLine commandLine = new picocli.CommandLine(new Main());
         commandLine.registerConverter(Web3j.class, new Web3TypeConverter());
         commandLine.registerConverter(Address.class, new AddressTypeConverter());
-        commandLine.parseArgs(args);
+        commandLine.parseWithHandler(new picocli.CommandLine.RunLast(), args);
     }
 
     @Override

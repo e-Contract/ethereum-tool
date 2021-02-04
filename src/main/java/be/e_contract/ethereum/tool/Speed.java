@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2019 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -100,12 +100,12 @@ public class Speed implements Callable<Void> {
                 Output.error("Error: " + ex.getMessage());
                 return;
             }
-            AnsiConsole.out.print(Ansi.ansi().reset().eraseScreen().cursor(0, 0));
+            AnsiConsole.out().print(Ansi.ansi().reset().eraseScreen().cursor(0, 0));
             int count = 40;
             System.out.print("Gas price (gwei)");
-            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
+            AnsiConsole.out().print(Ansi.ansi().cursorToColumn(20));
             System.out.print("Average time (sec)");
-            AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
+            AnsiConsole.out().print(Ansi.ansi().cursorToColumn(40));
             System.out.println("Tx count");
             List<Map.Entry<BigInteger, Timing>> gasPricesList = new ArrayList<>(gasPrices.entrySet());
             // sort on gas price
@@ -121,20 +121,20 @@ public class Speed implements Callable<Void> {
                 }
                 switch (nodeGasPrice.compareTo(gasPriceEntry.getKey())) {
                     case -1:
-                        AnsiConsole.out.print(Ansi.ansi().fgBrightGreen());
+                        AnsiConsole.out().print(Ansi.ansi().fgBrightGreen());
                         break;
                     case 0:
-                        AnsiConsole.out.print(Ansi.ansi().fgBrightYellow());
+                        AnsiConsole.out().print(Ansi.ansi().fgBrightYellow());
                         break;
                     case 1:
-                        AnsiConsole.out.print(Ansi.ansi().fgBrightRed());
+                        AnsiConsole.out().print(Ansi.ansi().fgBrightRed());
                         break;
                 }
                 BigDecimal gasPriceGwei = Convert.fromWei(new BigDecimal(gasPriceEntry.getKey()), Convert.Unit.GWEI);
                 System.out.print(gasPriceGwei);
-                AnsiConsole.out.print(Ansi.ansi().cursorToColumn(20));
+                AnsiConsole.out().print(Ansi.ansi().cursorToColumn(20));
                 System.out.print(gasPriceEntry.getValue().getAverageTime());
-                AnsiConsole.out.print(Ansi.ansi().cursorToColumn(40));
+                AnsiConsole.out().print(Ansi.ansi().cursorToColumn(40));
                 System.out.println(gasPriceEntry.getValue().getCount());
             }
             // TODO: we should implement a "sliding window" here
