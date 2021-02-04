@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -53,7 +53,7 @@ import org.web3j.protocol.Web3j;
             Block.class
         },
         versionProvider = VersionProvider.class,
-        footer = "Copyright (C) 2018-2020 Frank Cornelis\nDonations: " + Version.DONATION,
+        footer = "Copyright (C) 2018-2021 Frank Cornelis\nDonations: " + Version.DONATION,
         separator = " "
 )
 public class Main implements Callable<Void> {
