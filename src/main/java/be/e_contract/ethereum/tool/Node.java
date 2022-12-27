@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -44,8 +44,6 @@ public class Node implements Callable<Void> {
             BigInteger hashRate = this.web3.ethHashrate().send().getHashrate();
             System.out.println("Hash rate: " + hashRate);
         }
-        String protocolVersion = this.web3.ethProtocolVersion().send().getProtocolVersion();
-        System.out.println("Protocol version: " + protocolVersion);
         boolean syncing = this.web3.ethSyncing().send().isSyncing();
         System.out.println("Syncing: " + syncing);
         String version = this.web3.netVersion().send().getNetVersion();

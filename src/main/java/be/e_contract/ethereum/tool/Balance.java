@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -17,14 +17,9 @@
  */
 package be.e_contract.ethereum.tool;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -67,22 +62,6 @@ public class Balance implements Callable<Void> {
         BigInteger balance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(balanceBlockNumber)).send().getBalance();
         BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
         System.out.println("Balance: " + balanceEther + " ether");
-
-        OkHttpClient httpClient = new OkHttpClient();
-        Request request = new Request.Builder().url("https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=EUR").build();
-        Response response = httpClient.newCall(request).execute();
-        ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        CoinmarketcapTickerResponse[] coinmarketcapTickerResponse
-                = objectMapper.readValue(response.body().byteStream(), CoinmarketcapTickerResponse[].class);
-        BigDecimal priceUsd = BigDecimal.valueOf(coinmarketcapTickerResponse[0].priceUsd);
-        BigDecimal priceEur = BigDecimal.valueOf(coinmarketcapTickerResponse[0].priceEur);
-        System.out.println("Ether price: " + priceUsd + " USD");
-        System.out.println("Ether price: " + priceEur + " EUR");
-
-        BigDecimal balanceUsd = balanceEther.multiply(priceUsd);
-        BigDecimal balanceEur = balanceEther.multiply(priceEur);
-        System.out.println("Balance: " + balanceUsd + " USD");
-        System.out.println("Balance: " + balanceEur + " EUR");
 
         return null;
     }

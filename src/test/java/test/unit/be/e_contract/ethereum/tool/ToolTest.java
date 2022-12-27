@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,7 +19,7 @@ package test.unit.be.e_contract.ethereum.tool;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.utils.Convert;

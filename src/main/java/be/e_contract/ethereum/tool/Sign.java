@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -71,6 +71,7 @@ public class Sign implements Callable<Void> {
         if (null != transactionTemplate.description) {
             System.out.println("Description: " + transactionTemplate.description);
         }
+        System.out.println("From: " + transactionTemplate.from);
         System.out.println("To: " + transactionTemplate.to);
         System.out.println("Value: " + transactionTemplate.value + " ether");
         System.out.println("Gas price: " + transactionTemplate.gasPrice + " gwei");
@@ -121,11 +122,6 @@ public class Sign implements Callable<Void> {
         byte[] signedTransaction;
         if (null != transactionTemplate.chainId) {
             System.out.println("Chain Id: " + transactionTemplate.chainId);
-            // https://github.com/web3j/web3j/issues/234
-            if (transactionTemplate.chainId > 46) {
-                Output.error("web3j cannot sign with chainId > 46");
-                return null;
-            }
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, transactionTemplate.chainId, credentials);
         } else {
             signedTransaction = TransactionEncoder.signMessage(rawTransaction, credentials);
