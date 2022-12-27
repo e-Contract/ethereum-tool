@@ -63,6 +63,12 @@ public class Balance implements Callable<Void> {
         BigDecimal balanceEther = Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER);
         System.out.println("Balance: " + balanceEther + " ether");
 
+        EthereumRates ethereumRates = new EthereumRates();
+        BigDecimal balanceUsd = ethereumRates.getDollar(balanceEther);
+        BigDecimal balanceEur = ethereumRates.getEuro(balanceEther);
+        System.out.println("Balance: " + balanceUsd + " USD");
+        System.out.println("Balance: " + balanceEur + " EUR");
+
         return null;
     }
 }

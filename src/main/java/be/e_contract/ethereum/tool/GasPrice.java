@@ -49,6 +49,13 @@ public class GasPrice implements Callable<Void> {
         BigDecimal gasPriceEther = Convert.fromWei(gasPriceWei, Convert.Unit.ETHER);
         BigDecimal costEther = gasUsed.multiply(gasPriceEther);
         System.out.println("Cost regular transaction: " + costEther + " ETH");
+
+        EthereumRates ethereumRates = new EthereumRates();
+        BigDecimal costUsd = ethereumRates.getDollar(costEther);
+        BigDecimal costEur = ethereumRates.getEuro(costEther);
+        System.out.println("Cost regular transaction: " + costUsd + " USD");
+        System.out.println("Cost regular transaction: " + costEur + " EUR");
+
         Output.warning("This displayed gas price is the price reported by the node itself.");
         Output.warning("This is not necessarily the sharpest price possible on the network.");
         return null;

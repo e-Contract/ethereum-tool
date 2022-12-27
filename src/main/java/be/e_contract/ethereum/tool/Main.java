@@ -50,7 +50,8 @@ import org.web3j.protocol.Web3j;
             Speed.class,
             Miners.class,
             Trace.class,
-            Block.class
+            Block.class,
+            Price.class
         },
         versionProvider = VersionProvider.class,
         footer = "Copyright (C) 2018-2022 Frank Cornelis\nDonations: " + Version.DONATION,
