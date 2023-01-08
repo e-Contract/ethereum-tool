@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2022 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -36,16 +36,23 @@ public class GasPrice implements Callable<Void> {
     public Void call() throws Exception {
         // calculates on latest blocks median gas price
         BigDecimal gasPriceWei = BigDecimal.valueOf(this.web3.ethGasPrice().send().getGasPrice().longValueExact());
-        System.out.println("Gas price: " + gasPriceWei + " wei");
+        System.out.println("Gas price per unit: " + gasPriceWei + " wei");
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
-        System.out.println("Gas price: " + gasPriceGwei + " Gwei");
+        System.out.println("Gas price per unit: " + gasPriceGwei + " Gwei");
 
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
+        BigDecimal baseFeePerGasWei = BigDecimal.valueOf(block.getBaseFeePerGas().longValueExact());
+        System.out.println("Base fee per gas: " + baseFeePerGasWei + " wei");
+        BigDecimal baseFeePerGasGwei = Convert.fromWei(baseFeePerGasWei, Convert.Unit.GWEI);
+        System.out.println("Base fee per gas: " + baseFeePerGasGwei + " Gwei");
+        BigDecimal priorityFeeWei = gasPriceWei.subtract(baseFeePerGasWei);
+        BigDecimal priorityFeeGwei = Convert.fromWei(priorityFeeWei, Convert.Unit.GWEI);
+        System.out.println("Priority fee (tip): " + priorityFeeGwei + " Gwei");
         System.out.println("Gas limit: " + block.getGasLimit() + " wei");
 
         BigDecimal gasUsed = BigDecimal.valueOf(21000);
-        System.out.println("Gas used on regular transaction: " + gasUsed);
+        System.out.println("Gas units used on regular transaction: " + gasUsed);
         BigDecimal gasPriceEther = Convert.fromWei(gasPriceWei, Convert.Unit.ETHER);
         BigDecimal costEther = gasUsed.multiply(gasPriceEther);
         System.out.println("Cost regular transaction: " + costEther + " ETH");
