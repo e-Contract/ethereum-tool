@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2022 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -17,11 +17,13 @@
  */
 package be.e_contract.ethereum.tool;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "node", description = "display node information", separator = " ")
@@ -57,8 +59,12 @@ public class Node implements Callable<Void> {
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         System.out.println("Latest block: " + blockNumber);
         EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
+        double percentageGasUsed = (double) block.getGasUsed().longValueExact() / block.getGasLimit().longValueExact();
         System.out.println("Gas used: " + block.getGasUsed() + " wei");
-        System.out.println("Gas limit: " + block.getGasLimit() + " wei");
+        System.out.println("Gas limit: " + block.getGasLimit() + " wei (" + percentageGasUsed + " %)");
+        BigDecimal baseFeePerGas = new BigDecimal(block.getBaseFeePerGas());
+        BigDecimal baseFeePerGasGwei = Convert.fromWei(baseFeePerGas, Convert.Unit.GWEI);
+        System.out.println("Base Fee: " + baseFeePerGasGwei + " Gwei");
         return null;
     }
 }

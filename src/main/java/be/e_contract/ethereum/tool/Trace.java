@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2019 e-Contract.be BVBA.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -17,6 +17,7 @@
  */
 package be.e_contract.ethereum.tool;
 
+import io.reactivex.disposables.Disposable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,8 +39,15 @@ public class Trace implements Callable<Void> {
     @CommandLine.Option(names = {"-a", "--address"}, required = true, description = "the key address")
     private Address address;
 
+    private Disposable blockDisposable;
+
     @Override
     public Void call() throws Exception {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (null != this.blockDisposable) {
+                this.blockDisposable.dispose();
+            }
+        }));
         System.out.println("Address: " + this.address.getAddress());
         BigInteger initialBlockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         BigInteger initialBalance = this.web3.ethGetBalance(this.address.getAddress(), DefaultBlockParameter.valueOf(initialBlockNumber)).send().getBalance();
@@ -62,7 +70,7 @@ public class Trace implements Callable<Void> {
                 }
             }
         }
-        this.web3.blockFlowable(true).subscribe(ethBlock -> {
+        this.blockDisposable = this.web3.blockFlowable(true).subscribe((EthBlock ethBlock) -> {
             EthBlock.Block block = ethBlock.getBlock();
             BigInteger blockNumber = block.getNumber();
             try {

@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2019-2020 e-Contract.be BV.
+ * Copyright (C) 2019-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -33,10 +33,10 @@ public class Block implements Callable<Void> {
     @CommandLine.Option(names = {"-l", "--location"}, required = true, description = "the location of the client node")
     private Web3j web3;
 
-    @CommandLine.Option(names = {"-h", "--hash"}, description = "the block hash")
+    @CommandLine.Option(names = {"-h", "--hash"}, description = "the optional block hash")
     private String blockHash;
 
-    @CommandLine.Option(names = {"-n", "--number"}, description = "the block number")
+    @CommandLine.Option(names = {"-n", "--number"}, description = "the optional block number")
     private BigInteger blockNumber;
 
     @CommandLine.Option(names = {"-t", "--transactions"}, description = "show the transactions")
@@ -45,9 +45,7 @@ public class Block implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (null == this.blockHash && null == this.blockNumber) {
-            Output.error("Provide block number or block hash");
-            picocli.CommandLine.usage(this, System.out);
-            return null;
+            this.blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         }
         if (null != this.blockNumber) {
             EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(this.blockNumber), true).send().getBlock();
@@ -68,14 +66,18 @@ public class Block implements Callable<Void> {
             }
             return;
         }
-        System.out.println("block number: " + block.getNumber());
-        System.out.println("block hash: " + block.getHash());
+        System.out.println("Block number: " + block.getNumber());
+        System.out.println("Block hash: " + block.getHash());
         BigInteger blockTimestamp = block.getTimestamp();
         Date blockTimestampDate = new Date(blockTimestamp.multiply(BigInteger.valueOf(1000)).longValue());
-        System.out.println("block timestamp: " + blockTimestampDate);
-        System.out.println("number of transactions: " + block.getTransactions().size());
-        System.out.println("gas limit: " + block.getGasLimit() + " wei");
-        System.out.println("gas used: " + block.getGasUsed() + " wei");
+        System.out.println("Block timestamp: " + blockTimestampDate);
+        System.out.println("Number of transactions: " + block.getTransactions().size());
+        double percentageGasUsed = (double) block.getGasUsed().longValueExact() / block.getGasLimit().longValueExact();
+        System.out.println("Gas limit: " + block.getGasLimit() + " wei");
+        System.out.println("Gas used: " + block.getGasUsed() + " wei (" + percentageGasUsed + " %)");
+        BigDecimal baseFeePerGas = new BigDecimal(block.getBaseFeePerGas());
+        BigDecimal baseFeePerGasGwei = Convert.fromWei(baseFeePerGas, Convert.Unit.GWEI);
+        System.out.println("Base Fee: " + baseFeePerGasGwei + " Gwei");
         if (this.displayTransactions != null) {
             System.out.println("Transactions:");
             for (EthBlock.TransactionResult transactionResult : block.getTransactions()) {
@@ -92,9 +94,9 @@ public class Block implements Callable<Void> {
             }
         }
         for (String uncle : block.getUncles()) {
-            System.out.println("block uncle: " + uncle);
+            System.out.println("Block uncle: " + uncle);
         }
-        System.out.println("parent hash: " + block.getParentHash());
+        System.out.println("Parent hash: " + block.getParentHash());
         System.out.println("SHA3Uncles: " + block.getSha3Uncles());
     }
 }

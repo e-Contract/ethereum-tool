@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2022 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -74,7 +74,7 @@ public class Sign implements Callable<Void> {
         System.out.println("From: " + transactionTemplate.from);
         System.out.println("To: " + transactionTemplate.to);
         System.out.println("Value: " + transactionTemplate.value + " ether");
-        System.out.println("Gas price: " + transactionTemplate.gasPrice + " gwei");
+        System.out.println("Gas price: " + transactionTemplate.gasPrice + " Gwei");
         System.out.println("Nonce: " + transactionTemplate.nonce);
         if (!WalletUtils.isValidAddress(transactionTemplate.to)) {
             Output.error("Invalid address: " + transactionTemplate.to);

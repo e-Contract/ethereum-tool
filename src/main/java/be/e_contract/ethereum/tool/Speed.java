@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -17,6 +17,7 @@
  */
 package be.e_contract.ethereum.tool;
 
+import io.reactivex.disposables.Disposable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,36 +45,44 @@ public class Speed implements Callable<Void> {
     @CommandLine.Option(names = {"-l", "--location"}, required = true, description = "the location of the client node")
     private Web3j web3;
 
+    private Disposable pendingTransactionDisposable;
+
+    private Disposable blockDisposable;
+
     @Override
     public Void call() throws Exception {
-        System.out.println("Takes a while for results getting to get in...");
-        Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
-        Map<BigInteger, Timing> gasPrices = new HashMap<>();
-        this.web3.pendingTransactionFlowable().subscribe(tx -> {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (null != this.pendingTransactionDisposable) {
+                this.pendingTransactionDisposable.dispose();
+            }
+            if (null != this.blockDisposable) {
+                this.blockDisposable.dispose();
+            }
+        }));
+        System.out.println("Waiting for first block...");
+        final Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
+        final Map<BigInteger, Timing> gasPrices = new HashMap<>();
+        this.pendingTransactionDisposable = this.web3.pendingTransactionFlowable().subscribe((Transaction tx) -> {
             // we don't know the transaction type (regular or contract) here yet, so we add everything here
             pendingTransactions.put(tx.getHash(), new PendingTransaction(tx.getGasPrice()));
         }, error -> {
             Output.error(error.getMessage());
             error.printStackTrace();
         });
-        this.web3.blockFlowable(true).subscribe(ethBlock -> {
+        this.blockDisposable = this.web3.blockFlowable(false).subscribe((EthBlock ethBlock) -> {
             EthBlock.Block block = ethBlock.getBlock();
-            boolean updated = false;
-            for (EthBlock.TransactionResult<EthBlock.TransactionObject> transactionResult : block.getTransactions()) {
-                EthBlock.TransactionObject transactionObject = transactionResult.get();
-                Transaction transaction = transactionObject.get();
-                String transactionHash = transaction.getHash();
-                // remove the transaction, independent of the transaction type (regular or contract)
+            BigInteger timestamp = block.getTimestamp();
+            Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
+            DateTime timestampDateTime = new DateTime(timestampDate);
+            int countProcessed = 0;
+            for (EthBlock.TransactionResult<String> transactionResult : block.getTransactions()) {
+                String transactionHash = transactionResult.get();
                 PendingTransaction pendingTransaction = pendingTransactions.remove(transactionHash);
-                if (!transaction.getGas().equals(BigInteger.valueOf(21000))) {
-                    // we only want stats on regular transactions
-                    continue;
-                }
                 if (null == pendingTransaction) {
                     // transaction was not known as a pending one before
                     continue;
                 }
-                updated = true;
+                countProcessed++;
                 BigInteger gasPrice = pendingTransaction.gasPrice;
                 Timing timing = gasPrices.get(gasPrice);
                 if (null == timing) {
@@ -81,16 +90,8 @@ public class Speed implements Callable<Void> {
                     gasPrices.put(gasPrice, timing);
                 } else {
                     // we should not be using "now" here, but the block timestamp
-                    BigInteger timestamp = block.getTimestamp();
-                    Date timestampDate = new Date(timestamp.multiply(BigInteger.valueOf(1000)).longValue());
-                    DateTime timestampDateTime = new DateTime(timestampDate);
                     timing.addTiming(pendingTransaction.created, timestampDateTime);
                 }
-            }
-
-            if (!updated) {
-                // only redo the table on changes
-                return;
             }
 
             BigInteger nodeGasPrice;
@@ -101,8 +102,13 @@ public class Speed implements Callable<Void> {
                 return;
             }
             AnsiConsole.out().print(Ansi.ansi().reset().eraseScreen().cursor(0, 0));
+            BigDecimal baseFeePerGas = new BigDecimal(block.getBaseFeePerGas().longValueExact());
+            BigDecimal baseFeePerGasGwei = Convert.fromWei(baseFeePerGas, Convert.Unit.GWEI);
+            System.out.println("Block: " + block.getNumber() + " - " + block.getTransactions().size() + " transactions - base fee " + baseFeePerGasGwei + " gwei");
+            System.out.println("Processed transactions: " + countProcessed);
+            System.out.println("Total pending transactions: " + pendingTransactions.size());
             int count = 40;
-            System.out.print("Gas price (gwei)");
+            System.out.print("Gas price (Gwei)");
             AnsiConsole.out().print(Ansi.ansi().cursorToColumn(20));
             System.out.print("Average time (sec)");
             AnsiConsole.out().print(Ansi.ansi().cursorToColumn(40));
@@ -111,10 +117,6 @@ public class Speed implements Callable<Void> {
             // sort on gas price
             gasPricesList.sort((o1, o2) -> o1.getKey().compareTo(o2.getKey()));
             for (Map.Entry<BigInteger, Timing> gasPriceEntry : gasPricesList) {
-                if (gasPriceEntry.getValue().getCount() < 4) {
-                    // we want a usable average time
-                    continue;
-                }
                 if (count-- == 0) {
                     //only show top of the list
                     break;
