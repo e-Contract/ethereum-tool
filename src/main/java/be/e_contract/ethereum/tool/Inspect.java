@@ -27,6 +27,8 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.SignedRawTransaction;
 import org.web3j.crypto.TransactionDecoder;
+import org.web3j.crypto.transaction.type.Transaction1559;
+import org.web3j.crypto.transaction.type.TransactionType;
 import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
@@ -68,9 +70,22 @@ public class Inspect implements Callable<Void> {
         System.out.println("Value: " + valueEther + " ether");
         BigDecimal gasLimitWei = new BigDecimal(transaction.getGasLimit());
         System.out.println("Gas limit: " + gasLimitWei + " gas units");
-        BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
-        BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
-        System.out.println("Gas price: " + gasPriceGwei + " Gwei");
+        TransactionType transactionType = transaction.getType();
+        if (transactionType == TransactionType.EIP1559) {
+            Transaction1559 transaction1559 = (Transaction1559) transaction.getTransaction();
+            System.out.println("Chain id: " + transaction1559.getChainId());
+            BigDecimal maxFeePerGasWei = new BigDecimal(transaction1559.getMaxFeePerGas());
+            BigDecimal maxFeePerGasGwei = Convert.fromWei(maxFeePerGasWei, Convert.Unit.GWEI);
+            System.out.println("Maximum fee per gas: " + maxFeePerGasGwei + " Gwei");
+            BigDecimal maxPriorityFeePerGasWei = new BigDecimal(transaction1559.getMaxPriorityFeePerGas());
+            BigDecimal maxPriorityFeePerGasGwei = Convert.fromWei(maxPriorityFeePerGasWei, Convert.Unit.GWEI);
+            System.out.println("Maximum priority fee per gas: " + maxPriorityFeePerGasGwei + " Gwei");
+        } else {
+            BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
+            BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
+            System.out.println("Gas price: " + gasPriceGwei + " Gwei");
+            System.out.println("This is a legacy transaction.");
+        }
         return null;
     }
 }

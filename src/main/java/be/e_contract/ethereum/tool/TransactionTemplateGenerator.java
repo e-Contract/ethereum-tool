@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2024 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -59,7 +59,8 @@ public class TransactionTemplateGenerator {
         transactionTemplate.from = address;
         transactionTemplate.to = "place destination address here";
         transactionTemplate.chainId = 1L; // Ethereum mainnet
-        transactionTemplate.gasPrice = 2;
+        transactionTemplate.maxFeePerGas = 2d;
+        transactionTemplate.maxPriorityFeePerGas = 0d;
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String transactionTemplateJSon = gson.toJson(transactionTemplate);
         FileUtils.writeStringToFile(templateFile, transactionTemplateJSon, "UTF-8");

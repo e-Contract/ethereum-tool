@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2023 e-Contract.be BV.
+ * Copyright (C) 2018-2024 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -68,13 +68,30 @@ public class Sign implements Callable<Void> {
         }
         Gson gson = new Gson();
         TransactionTemplate transactionTemplate = gson.fromJson(new FileReader(this.templateFile), TransactionTemplate.class);
+        if (transactionTemplate.gasPrice == null) {
+            if (transactionTemplate.maxFeePerGas == null || transactionTemplate.maxPriorityFeePerGas == null) {
+                Output.error("Provide either gasPrice or maxFeePerGas and maxPriorityFeePerGas.");
+                return null;
+            }
+        } else {
+            if (transactionTemplate.maxFeePerGas != null || transactionTemplate.maxPriorityFeePerGas != null) {
+                Output.error("Provide either gasPrice or maxFeePerGas and maxPriorityFeePerGas.");
+                return null;
+            }
+        }
         if (null != transactionTemplate.description) {
             System.out.println("Description: " + transactionTemplate.description);
         }
         System.out.println("From: " + transactionTemplate.from);
         System.out.println("To: " + transactionTemplate.to);
         System.out.println("Value: " + transactionTemplate.value + " ether");
-        System.out.println("Gas price: " + transactionTemplate.gasPrice + " Gwei");
+        if (null != transactionTemplate.gasPrice) {
+            System.out.println("Gas price: " + transactionTemplate.gasPrice + " Gwei");
+            Output.error("Will create a legacy transaction!");
+        } else {
+            System.out.println("Maximum fee per gas: " + transactionTemplate.maxFeePerGas + " Gwei");
+            System.out.println("Maximum priority fee per gas: " + transactionTemplate.maxPriorityFeePerGas + " Gwei");
+        }
         System.out.println("Nonce: " + transactionTemplate.nonce);
         if (!WalletUtils.isValidAddress(transactionTemplate.to)) {
             Output.error("Invalid address: " + transactionTemplate.to);
@@ -112,13 +129,29 @@ public class Sign implements Callable<Void> {
             return null;
         }
         BigInteger nonce = BigInteger.valueOf(transactionTemplate.nonce);
-        BigDecimal gasPriceGwei = BigDecimal.valueOf(transactionTemplate.gasPrice);
-        BigDecimal gasPriceWei = Convert.toWei(gasPriceGwei, Convert.Unit.GWEI);
         BigDecimal valueEther = BigDecimal.valueOf(transactionTemplate.value);
         BigDecimal valueWei = Convert.toWei(valueEther, Convert.Unit.ETHER);
         BigInteger gasLimit = BigInteger.valueOf(21000);
-        RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPriceWei.toBigIntegerExact(),
-                gasLimit, transactionTemplate.to, valueWei.toBigIntegerExact());
+        RawTransaction rawTransaction;
+        if (transactionTemplate.gasPrice != null) {
+            BigDecimal gasPriceGwei = BigDecimal.valueOf(transactionTemplate.gasPrice);
+            BigDecimal gasPriceWei = Convert.toWei(gasPriceGwei, Convert.Unit.GWEI);
+            rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPriceWei.toBigIntegerExact(),
+                    gasLimit, transactionTemplate.to, valueWei.toBigIntegerExact());
+        } else {
+            long chainId;
+            if (null != transactionTemplate.chainId) {
+                chainId = transactionTemplate.chainId;
+            } else {
+                chainId = 1;
+            }
+            BigDecimal maxPriorityFeePerGasGwei = BigDecimal.valueOf(transactionTemplate.maxPriorityFeePerGas);
+            BigDecimal maxPriorityFeePerGasWei = Convert.toWei(maxPriorityFeePerGasGwei, Convert.Unit.GWEI);
+            BigDecimal maxFeePerGasGwei = BigDecimal.valueOf(transactionTemplate.maxFeePerGas);
+            BigDecimal maxFeePerGasWei = Convert.toWei(maxFeePerGasGwei, Convert.Unit.GWEI);
+            rawTransaction = RawTransaction.createEtherTransaction(chainId, nonce, gasLimit, address, valueWei.toBigIntegerExact(),
+                    maxPriorityFeePerGasWei.toBigIntegerExact(), maxFeePerGasWei.toBigIntegerExact());
+        }
         byte[] signedTransaction;
         if (null != transactionTemplate.chainId) {
             System.out.println("Chain Id: " + transactionTemplate.chainId);

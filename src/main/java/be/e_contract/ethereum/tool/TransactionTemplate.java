@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2024 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -31,7 +31,13 @@ public class TransactionTemplate {
     public double value;
 
     // unit: gwei
-    public double gasPrice;
+    public Double gasPrice;
+
+    // unit: gwei
+    public Double maxFeePerGas;
+
+    // unit: gwei
+    public Double maxPriorityFeePerGas;
 
     public long nonce;
 
