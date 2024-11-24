@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2019-2023 e-Contract.be BV.
+ * Copyright (C) 2019-2024 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -41,6 +41,9 @@ public class Block implements Callable<Void> {
 
     @CommandLine.Option(names = {"-t", "--transactions"}, description = "show the transactions")
     private boolean[] displayTransactions;
+
+    @CommandLine.Option(names = {"-r", "--regular-transactions"}, description = "show the regular transactions")
+    private boolean[] displayRegularTransactions;
 
     @Override
     public Void call() throws Exception {
@@ -91,6 +94,20 @@ public class Block implements Callable<Void> {
                 } else {
                     Output.println(20, "Contract transaction: " + transaction.getInput());
                 }
+            }
+        }
+        if (this.displayRegularTransactions != null) {
+            System.out.println("Regular transactions:");
+            for (EthBlock.TransactionResult transactionResult : block.getTransactions()) {
+                EthBlock.TransactionObject transaction = (EthBlock.TransactionObject) transactionResult.get();
+                if (!"0x".equals(transaction.getInput())) {
+                    continue;
+                }
+                Output.println(10, "Transaction hash: " + transaction.getHash());
+                Output.println(20, "From: " + transaction.getFrom());
+                Output.println(20, "To: " + transaction.getTo());
+                BigDecimal valueEther = Convert.fromWei(new BigDecimal(transaction.getValue()), Convert.Unit.ETHER);
+                Output.println(20, "Value: " + valueEther + " ether");
             }
         }
         for (String uncle : block.getUncles()) {
