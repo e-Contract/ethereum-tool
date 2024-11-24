@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2023 e-Contract.be BV.
+ * Copyright (C) 2018-2024 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -67,7 +67,7 @@ public class Inspect implements Callable<Void> {
         BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
         System.out.println("Value: " + valueEther + " ether");
         BigDecimal gasLimitWei = new BigDecimal(transaction.getGasLimit());
-        System.out.println("Gas limit: " + gasLimitWei + " wei");
+        System.out.println("Gas limit: " + gasLimitWei + " gas units");
         BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
         BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
         System.out.println("Gas price: " + gasPriceGwei + " Gwei");

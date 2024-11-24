@@ -75,9 +75,9 @@ public class Block implements Callable<Void> {
         Date blockTimestampDate = new Date(blockTimestamp.multiply(BigInteger.valueOf(1000)).longValue());
         System.out.println("Block timestamp: " + blockTimestampDate);
         System.out.println("Number of transactions: " + block.getTransactions().size());
-        double percentageGasUsed = (double) block.getGasUsed().longValueExact() / block.getGasLimit().longValueExact();
-        System.out.println("Gas limit: " + block.getGasLimit() + " wei");
-        System.out.println("Gas used: " + block.getGasUsed() + " wei (" + percentageGasUsed + " %)");
+        double percentageGasUsed = (double) block.getGasUsed().longValueExact() / block.getGasLimit().longValueExact() * 100;
+        System.out.println("Gas limit: " + block.getGasLimit() + " gas units");
+        System.out.println("Gas used: " + block.getGasUsed() + " gas units (" + percentageGasUsed + " %)");
         BigDecimal baseFeePerGas = new BigDecimal(block.getBaseFeePerGas());
         BigDecimal baseFeePerGasGwei = Convert.fromWei(baseFeePerGas, Convert.Unit.GWEI);
         System.out.println("Base Fee: " + baseFeePerGasGwei + " Gwei");
@@ -94,6 +94,21 @@ public class Block implements Callable<Void> {
                 } else {
                     Output.println(20, "Contract transaction: " + transaction.getInput());
                 }
+                BigInteger gasUsed = transaction.getGas();
+                Output.println(20, "Gas used: " + gasUsed + " gas units");
+                BigDecimal gasPrice = Convert.fromWei(new BigDecimal(transaction.getGasPrice()), Convert.Unit.GWEI);
+                Output.println(20, "Gas price: " + gasPrice + " Gwei");
+                BigInteger maxFeePerGas = transaction.getMaxFeePerGas();
+                if (null != maxFeePerGas) {
+                    // eip-1559
+                    Output.println(20, "Max fee per gas: " + Convert.fromWei(new BigDecimal(maxFeePerGas), Convert.Unit.GWEI) + " Gwei");
+                    if (null != transaction.getMaxPriorityFeePerGasRaw()) {
+                        BigInteger maxPriorityFeePerGas = transaction.getMaxPriorityFeePerGas();
+                        Output.println(20, "Max priority fee per gas: " + Convert.fromWei(new BigDecimal(maxPriorityFeePerGas), Convert.Unit.GWEI) + " Gwei");
+                    }
+                } else {
+                    Output.println(20, "Legacy transaction.");
+                }
             }
         }
         if (this.displayRegularTransactions != null) {
@@ -108,6 +123,21 @@ public class Block implements Callable<Void> {
                 Output.println(20, "To: " + transaction.getTo());
                 BigDecimal valueEther = Convert.fromWei(new BigDecimal(transaction.getValue()), Convert.Unit.ETHER);
                 Output.println(20, "Value: " + valueEther + " ether");
+                BigInteger gasUsed = transaction.getGas();
+                Output.println(20, "Gas used: " + gasUsed + " gas units");
+                BigDecimal gasPrice = Convert.fromWei(new BigDecimal(transaction.getGasPrice()), Convert.Unit.GWEI);
+                Output.println(20, "Gas price: " + gasPrice + " Gwei");
+                BigInteger maxFeePerGas = transaction.getMaxFeePerGas();
+                if (null != maxFeePerGas) {
+                    // eip-1559
+                    Output.println(20, "Max fee per gas: " + Convert.fromWei(new BigDecimal(maxFeePerGas), Convert.Unit.GWEI) + " Gwei");
+                    if (null != transaction.getMaxPriorityFeePerGasRaw()) {
+                        BigInteger maxPriorityFeePerGas = transaction.getMaxPriorityFeePerGas();
+                        Output.println(20, "Max priority fee per gas: " + Convert.fromWei(new BigDecimal(maxPriorityFeePerGas), Convert.Unit.GWEI) + " Gwei");
+                    }
+                } else {
+                    Output.println(20, "Legacy transaction.");
+                }
             }
         }
         for (String uncle : block.getUncles()) {

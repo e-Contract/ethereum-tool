@@ -1,6 +1,6 @@
 /*
  * Ethereum Tool project.
- * Copyright (C) 2018-2023 e-Contract.be BV.
+ * Copyright (C) 2018-2024 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -49,10 +49,10 @@ public class GasPrice implements Callable<Void> {
         BigDecimal priorityFeeWei = gasPriceWei.subtract(baseFeePerGasWei);
         BigDecimal priorityFeeGwei = Convert.fromWei(priorityFeeWei, Convert.Unit.GWEI);
         System.out.println("Priority fee (tip): " + priorityFeeGwei + " Gwei");
-        System.out.println("Gas limit: " + block.getGasLimit() + " wei");
+        System.out.println("Gas limit: " + block.getGasLimit() + " gas units");
 
         BigDecimal gasUsed = BigDecimal.valueOf(21000);
-        System.out.println("Gas units used on regular transaction: " + gasUsed);
+        System.out.println("Gas used on regular transaction: " + gasUsed + " units");
         BigDecimal gasPriceEther = Convert.fromWei(gasPriceWei, Convert.Unit.ETHER);
         BigDecimal costEther = gasUsed.multiply(gasPriceEther);
         System.out.println("Cost regular transaction: " + costEther + " ETH");

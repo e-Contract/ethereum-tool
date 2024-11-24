@@ -51,9 +51,9 @@ public class Node implements Callable<Void> {
         BigInteger blockNumber = this.web3.ethBlockNumber().send().getBlockNumber();
         System.out.println("Latest block: " + blockNumber);
         EthBlock.Block block = this.web3.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send().getBlock();
-        double percentageGasUsed = (double) block.getGasUsed().longValueExact() / block.getGasLimit().longValueExact();
-        System.out.println("Gas used: " + block.getGasUsed() + " wei");
-        System.out.println("Gas limit: " + block.getGasLimit() + " wei (" + percentageGasUsed + " %)");
+        double percentageGasUsed = (double) block.getGasUsed().longValueExact() / block.getGasLimit().longValueExact() * 100;
+        System.out.println("Gas used: " + block.getGasUsed() + " gas units");
+        System.out.println("Gas limit: " + block.getGasLimit() + " gas units (" + percentageGasUsed + " %)");
         BigDecimal baseFeePerGas = new BigDecimal(block.getBaseFeePerGas());
         BigDecimal baseFeePerGasGwei = Convert.fromWei(baseFeePerGas, Convert.Unit.GWEI);
         System.out.println("Base Fee: " + baseFeePerGasGwei + " Gwei");
