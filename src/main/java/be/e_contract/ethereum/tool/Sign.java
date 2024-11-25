@@ -59,11 +59,11 @@ public class Sign implements Callable<Void> {
             }
         }
         if (!this.templateFile.exists()) {
-            Output.error("Template file does not exist");
+            Output.error("Template file does not exist: " + this.templateFile.getAbsolutePath());
             return null;
         }
         if (!this.keyFile.exists()) {
-            Output.error("Non existing key file");
+            Output.error("Non existing key file: " + this.keyFile.getAbsolutePath());
             return null;
         }
         Gson gson = new Gson();
@@ -91,6 +91,9 @@ public class Sign implements Callable<Void> {
         } else {
             System.out.println("Maximum fee per gas: " + transactionTemplate.maxFeePerGas + " Gwei");
             System.out.println("Maximum priority fee per gas: " + transactionTemplate.maxPriorityFeePerGas + " Gwei");
+            if (0 == transactionTemplate.maxPriorityFeePerGas) {
+                Output.error("Maximum priority fee per gas is zero.");
+            }
         }
         System.out.println("Nonce: " + transactionTemplate.nonce);
         if (!WalletUtils.isValidAddress(transactionTemplate.to)) {
@@ -149,7 +152,7 @@ public class Sign implements Callable<Void> {
             BigDecimal maxPriorityFeePerGasWei = Convert.toWei(maxPriorityFeePerGasGwei, Convert.Unit.GWEI);
             BigDecimal maxFeePerGasGwei = BigDecimal.valueOf(transactionTemplate.maxFeePerGas);
             BigDecimal maxFeePerGasWei = Convert.toWei(maxFeePerGasGwei, Convert.Unit.GWEI);
-            rawTransaction = RawTransaction.createEtherTransaction(chainId, nonce, gasLimit, address, valueWei.toBigIntegerExact(),
+            rawTransaction = RawTransaction.createEtherTransaction(chainId, nonce, gasLimit, transactionTemplate.to, valueWei.toBigIntegerExact(),
                     maxPriorityFeePerGasWei.toBigIntegerExact(), maxFeePerGasWei.toBigIntegerExact());
         }
         byte[] signedTransaction;

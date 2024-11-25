@@ -29,6 +29,8 @@ import org.web3j.crypto.SignedRawTransaction;
 import org.web3j.crypto.TransactionDecoder;
 import org.web3j.crypto.transaction.type.Transaction1559;
 import org.web3j.crypto.transaction.type.TransactionType;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
@@ -37,6 +39,9 @@ public class Inspect implements Callable<Void> {
 
     @CommandLine.Option(names = {"-f", "--file"}, required = true, description = "the transaction file")
     private File transactionFile;
+
+    @CommandLine.Option(names = {"-l", "--location"}, description = "the optional location of the client node for additional sanity checks")
+    private Web3j web3;
 
     @Override
     public Void call() throws Exception {
@@ -65,6 +70,12 @@ public class Inspect implements Callable<Void> {
         }
         BigInteger nonce = transaction.getNonce();
         System.out.println("Nonce: " + nonce);
+        if (null != this.web3) {
+            BigInteger transactionCount = this.web3.ethGetTransactionCount(from, DefaultBlockParameterName.LATEST).send().getTransactionCount();
+            if (!transactionCount.equals(nonce)) {
+                Output.error("Nonce " + nonce + " incorrect. Should be " + transactionCount);
+            }
+        }
         BigDecimal valueWei = new BigDecimal(transaction.getValue());
         BigDecimal valueEther = Convert.fromWei(valueWei, Convert.Unit.ETHER);
         System.out.println("Value: " + valueEther + " ether");
@@ -80,6 +91,30 @@ public class Inspect implements Callable<Void> {
             BigDecimal maxPriorityFeePerGasWei = new BigDecimal(transaction1559.getMaxPriorityFeePerGas());
             BigDecimal maxPriorityFeePerGasGwei = Convert.fromWei(maxPriorityFeePerGasWei, Convert.Unit.GWEI);
             System.out.println("Maximum priority fee per gas: " + maxPriorityFeePerGasGwei + " Gwei");
+            if (null != this.web3) {
+                BigInteger nodeGasPrice = this.web3.ethGasPrice().send().getGasPrice();
+                if (nodeGasPrice.compareTo(transaction1559.getMaxFeePerGas()) > 0) {
+                    Output.error("Current gas price above maximum fee per gas.");
+                    BigDecimal nodeGasPriceWei = new BigDecimal(nodeGasPrice);
+                    BigDecimal nodeGasPriceGwei = Convert.fromWei(nodeGasPriceWei, Convert.Unit.GWEI);
+                    Output.error("Current gas price: " + nodeGasPriceGwei + " Gwei.");
+                }
+                BigInteger nodeMaxPriorityFeePerGas = this.web3.ethMaxPriorityFeePerGas().send().getMaxPriorityFeePerGas();
+                BigDecimal nodeMaxPriorityFeePerGasWei = new BigDecimal(nodeMaxPriorityFeePerGas);
+                BigDecimal nodeMaxPriorityFeePerGasGwei = Convert.fromWei(nodeMaxPriorityFeePerGasWei, Convert.Unit.GWEI);
+                System.out.println("Current maximum priority fee per gas: " + nodeMaxPriorityFeePerGasGwei + " Gwei");
+                BigInteger balance = this.web3.ethGetBalance(from, DefaultBlockParameterName.LATEST).send().getBalance();
+                BigInteger maxTotalCost = transaction.getValue().add(transaction.getGasLimit().multiply(transaction1559.getMaxFeePerGas()));
+                if (balance.compareTo(maxTotalCost) < 0) {
+                    Output.error("Balance might be too low.");
+                    BigDecimal balanceWei = new BigDecimal(balance);
+                    BigDecimal balanceEther = Convert.fromWei(balanceWei, Convert.Unit.ETHER);
+                    Output.error("Balance: " + balanceEther + " ETH");
+                    BigDecimal maxTotalCostWei = new BigDecimal(maxTotalCost);
+                    BigDecimal maxTotalCostEther = Convert.fromWei(maxTotalCostWei, Convert.Unit.ETHER);
+                    Output.error("Maximum total cost: " + maxTotalCostEther + " ETH");
+                }
+            }
         } else {
             BigDecimal gasPriceWei = new BigDecimal(transaction.getGasPrice());
             BigDecimal gasPriceGwei = Convert.fromWei(gasPriceWei, Convert.Unit.GWEI);
