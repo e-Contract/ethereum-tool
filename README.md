@@ -14,9 +14,9 @@ If you like this tool, please consider a donation at:
 Download the latest ZIP from:
 https://www.e-contract.be/maven2/be/e-contract/ethereum-tool/
 
-Install (Mac OS X, Linux, or FreeBSD) via:
+Install (macOS, Linux, or FreeBSD) via:
 ```
-sudo unzip -o ethereum-tool-1.0.7.zip -d /usr/local/
+sudo unzip -o ethereum-tool-1.0.8.zip -d /usr/local/
 ```
 
 
@@ -100,6 +100,7 @@ Inspect the signed transaction via:
 ```
 ethereum-tool inspect -f transaction
 ```
+
 
 # Transmitting the transaction
 
