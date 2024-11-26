@@ -19,10 +19,15 @@ package be.e_contract.ethereum.tool;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.EthFeeHistory;
 import org.web3j.utils.Convert;
 import picocli.CommandLine;
 
@@ -62,6 +67,41 @@ public class GasPrice implements Callable<Void> {
         BigDecimal costEur = ethereumRates.getEuro(costEther);
         System.out.println("Cost regular transaction: " + costUsd + " USD");
         System.out.println("Cost regular transaction: " + costEur + " EUR");
+
+        List<Double> requestedRewardPercentiles = new LinkedList<>();
+        requestedRewardPercentiles.add(25d);
+        requestedRewardPercentiles.add(50d);
+        requestedRewardPercentiles.add(75d);
+        EthFeeHistory.FeeHistory feeHistory = this.web3.ethFeeHistory(10, DefaultBlockParameterName.LATEST, requestedRewardPercentiles)
+                .send().getFeeHistory();
+
+        System.out.println("Fee History");
+        System.out.println("\tBFPG = Base Fee Per Gas (Gwei)");
+        System.out.println("\tUR% = Usage Ratio in %");
+        System.out.println("\tRPxx = Reward Percentile xx (Gwei)");
+        System.out.println("Block\tBFPG\tUR%\tRP25\tRP50\tRP75");
+        int n = feeHistory.getBaseFeePerGas().size();
+        DecimalFormat decimalFormat = new DecimalFormat("#.00");
+        for (int idx = 0; idx < n; idx++) {
+            BigInteger baseFeePerGas = feeHistory.getBaseFeePerGas().get(idx);
+            baseFeePerGasWei = BigDecimal.valueOf(baseFeePerGas.longValueExact());
+            baseFeePerGasGwei = Convert.fromWei(baseFeePerGasWei, Convert.Unit.GWEI);
+            System.out.print((n - idx) + "\t" + baseFeePerGasGwei.setScale(4, BigDecimal.ROUND_HALF_UP) + "\t");
+            if (idx < feeHistory.getGasUsedRatio().size()) {
+                double gasUsedRatio = feeHistory.getGasUsedRatio().get(idx) * 100;
+                System.out.print(decimalFormat.format(gasUsedRatio));
+            }
+            System.out.print("\t");
+            if (idx < feeHistory.getReward().size()) {
+                List<BigInteger> rewardPercentiles = feeHistory.getReward().get(idx);
+                for (BigInteger rewardPercentile : rewardPercentiles) {
+                    BigDecimal rewardPercentileWei = BigDecimal.valueOf(rewardPercentile.longValueExact());
+                    BigDecimal rewardPercentileGwei = Convert.fromWei(rewardPercentileWei, Convert.Unit.GWEI);
+                    System.out.print(rewardPercentileGwei.setScale(4, BigDecimal.ROUND_HALF_UP) + "\t");
+                }
+            }
+            System.out.println();
+        }
 
         Output.warning("This displayed gas price is the price reported by the node itself.");
         Output.warning("This is not necessarily the sharpest price possible on the network.");
